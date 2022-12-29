@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="https://openlayers.org/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Using OpenLayers with Vite</title>
+    <style>
+      .rotate-north {
+        top: 65px;
+        left: .5em;
+      }
+      .ol-touch .rotate-north {
+        top: 80px;
+      }
+    </style>
+    <script type="module" src="./main.js"></script>
+  </head>
+  <body>
+
+    <div id="map"></div>
+    
+    <!-- A modal dialog containing a form -->
+    <dialog id="favDialog">
+      <form method="dialog">
+        <p>
+          <label>Name:
+            <input type="text" id="fname" name="fname">
+          </label>
+        </p>
+        <p>
+          <label>Type:
+            <select>
+              <option value="default">Border</option>
+              <option>Major Road</option>
+              <option>Minor Road</option>
+              <option>Footpath</option>
+            </select>
+          </label>
+        </p>
+        <p>
+          <label>Color:
+            <input type="color" id="fcolor" name="fcolor" value="#000000">
+          </label>
+        </p>
+        <div>
+          <button value="cancel">Cancel</button>
+          <button id="confirmBtn" value="default">Confirm</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>
