@@ -5,6 +5,7 @@ An approach to visualize continent and local maps of a D&D campaign wit a google
 To start a development server (available at http://localhost:5173):
 
     cd dm-map
+    npm install
     npm start
 
 To generate a build ready for production:
