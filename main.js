@@ -10,8 +10,7 @@ import LayerGroup from 'ol/layer/Group';
 
 import 'ol-layerswitcher/dist/ol-layerswitcher.css';
 import LayerSwitcher from 'ol-layerswitcher';
-import Style from 'ol/style/Style';
-import Stroke from 'ol/style/Stroke';
+import {Circle, Fill, Stroke, Text, Style} from 'ol/style';
 import GeoJSON from 'ol/format/GeoJSON';
 import {Vector as VectorSource} from 'ol/source';
 import {Vector as VectorLayer} from 'ol/layer';
@@ -139,8 +138,10 @@ class DrawCityControl extends Control {
 // coordinates directly to map coordinates, so we create a projection that uses
 // the image extent in pixels.
 const extent = [0, 0, 4763, 3411];
-const extent2 = [1603, 2033, 2782, 3023];//1378
-const extent3 = [2009, 2392, 2011, 2393.49];
+const extent2 = [1603, 2032, 2782, 3022];
+const extent3 = [2009, 2392, 2011.032, 2393.516];
+const extent4 = [2135, 2807, 2138.107, 2808.997];
+
 const projection = new Projection({
   code: 'xkcd-image',
   units: 'pixels',
@@ -163,6 +164,14 @@ styles['Territory'] = new Style({
   }),
 })
 
+styles['City'] = new Style({
+  image: new Circle({
+    fill: new Fill({color: 'black'}),
+    radius: 10,
+  }),
+  text: new Text()
+})
+
 const gj = {
   "type": "FeatureCollection",
   "features": [
@@ -170,12 +179,18 @@ const gj = {
       "type": "Feature",
       "properties": {
           "name": "Missing Person",
-          "styleTemplate": "MajRoad"
+          "styleTemplate": "City",
+          "dynamicScale": [
+            {"parameter": ["image", "radius"],
+             "min": 5,
+             "max": 25
+            }
+          ]
       },
       "geometry": {
         "type": "Point",
         "coordinates": [2381.5, 1705.5]
-      }
+      },
     },
   ]
 };
@@ -220,7 +235,17 @@ const wheloon = new ImageLayer({
     projection: projection,
     imageExtent: extent3,
   }),
-  minZoom: 9,
+  minZoom: 8,
+});
+
+const shadowdale = new ImageLayer({
+  title: 'shadowdale',
+  source: new Static({
+    url: 'sourcemaps/shadowdale-surrounding.jpg',
+    projection: projection,
+    imageExtent: extent4,
+  }),
+  minZoom: 8,
 });
 
 const baseMaps = new LayerGroup({
@@ -232,7 +257,7 @@ const baseMaps = new LayerGroup({
 const overlayMaps = new LayerGroup({
   title: 'Detail Maps',
   visible: true,
-  layers: [cormyr_labeled, wheloon],
+  layers: [cormyr_labeled, wheloon, shadowdale],
 });
 
 const map = new Map({
@@ -264,20 +289,46 @@ var planningAppsLayer = new VectorLayer({
   visible: true,
   source: planningAppsSource,
   style: function(feature, resolution){
-    var test = styles[feature.get('styleTemplate')].clone();
-    var width = test.getStroke().getWidth();
-    var linedash = test.getStroke().getLineDash();
-    if (width) {
-    test.getStroke().setWidth(width/resolution);
+    var baseStyle;
+    if (styles[feature.get('styleTemplate')]) {
+      baseStyle = styles[feature.get('styleTemplate')].clone();
+    } else {
+      baseStyle = new Style();
     }
-    if(linedash) {
-      test.getStroke().setLineDash([linedash[0]/resolution, linedash[1]/resolution]);
+
+    if (feature.get('dynamicScale')) {
+      for (const params in feature.get('dynamicScale')) {
+
+      }
     }
-    console.log(resolution);
-    console.log(width);
-    return test;
+    
+
+    var stroke = baseStyle.getStroke();
+    if (stroke) {
+      stroke.setWidth(stroke.getWidth()/resolution);
+    
+
+      var linedash = stroke.getLineDash();
+      if(linedash) {
+        stroke.setLineDash([linedash[0]/resolution, linedash[1]/resolution]);
+      }
+    }
+
+    var label = feature.get('name');
+    if (label) {
+      if (baseStyle.getText()) {
+        baseStyle.getText().setText(label);
+      }
+    }
+    return baseStyle;
   }
 });
+
+function buildStyle(feature, resolution){
+  var style = new Style();
+
+
+}
 
 // Add the layer to the map
 map.addLayer(planningAppsLayer);
@@ -313,6 +364,7 @@ drawCity.on('drawend', function(event) {
   var fid = getUid(event.feature);
   
   event.feature.setId(fid);
+  event.feature.set('name', "TestName");
   event.feature.set('styleTemplate', 'City');
 
   //favDialog.showModal();
