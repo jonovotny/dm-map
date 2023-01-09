@@ -141,6 +141,7 @@ const extent = [0, 0, 4763, 3411];
 const extent2 = [1603, 2032, 2782, 3022];
 const extent3 = [2009, 2392, 2011.032, 2393.516];
 const extent4 = [2135, 2807, 2138.107, 2808.997];
+const extent5 = [2135, 2807, 2138.107, 2808.997];
 
 const projection = new Projection({
   code: 'xkcd-image',
@@ -197,7 +198,7 @@ const gj = {
 
 
 const wm_full = new ImageLayer({
-  title: 'Faerun (detailed)',
+  title: 'Faerun (GM)',
   type: 'base',
   visible: false,
   source: new Static({
@@ -239,7 +240,7 @@ const wheloon = new ImageLayer({
 });
 
 const shadowdale = new ImageLayer({
-  title: 'shadowdale',
+  title: 'Shadowdale (GM)',
   source: new Static({
     url: 'sourcemaps/shadowdale-surrounding.jpg',
     projection: projection,
@@ -247,6 +248,17 @@ const shadowdale = new ImageLayer({
   }),
   minZoom: 8,
 });
+
+const shadowdale_rough = new ImageLayer({
+  title: 'Shadowdale (Explored)',
+  source: new Static({
+    url: 'sourcemaps/shadowdale-bw.png',
+    projection: projection,
+    imageExtent: extent5,
+  }),
+  minZoom: 8,
+});
+
 
 const baseMaps = new LayerGroup({
   title: 'Continent',
@@ -257,7 +269,7 @@ const baseMaps = new LayerGroup({
 const overlayMaps = new LayerGroup({
   title: 'Detail Maps',
   visible: true,
-  layers: [cormyr_labeled, wheloon, shadowdale],
+  layers: [cormyr_labeled, wheloon, shadowdale, shadowdale_rough],
 });
 
 const map = new Map({
