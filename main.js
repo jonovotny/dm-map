@@ -168,9 +168,16 @@ styles['Territory'] = new Style({
 styles['City'] = new Style({
   image: new Circle({
     fill: new Fill({color: 'black'}),
-    radius: 10,
+    radius: 5,
   }),
-  text: new Text()
+  text: new Text({
+    stroke: new Stroke({
+      color: 'white',
+      width: 1
+    }),
+    font: '14px serif',
+    offsetY: -12
+  })
 })
 
 const gj = {
