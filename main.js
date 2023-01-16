@@ -145,8 +145,6 @@ class DrawCityControl extends Control {
 }
 
 
-
-
 // Map views always need a projection.  Here we just want to map image
 // coordinates directly to map coordinates, so we create a projection that uses
 // the image extent in pixels.
@@ -365,6 +363,10 @@ function buildStyle(feature, resolution){
 
 // Add the layer to the map
 map.addLayer(planningAppsLayer);
+
+map.getView().on('change:resolution', (event) => {
+  console.log(event);
+});
 
 const select = new Select();
 
