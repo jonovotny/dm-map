@@ -21,9 +21,9 @@ import { closestOnCircle } from 'ol/coordinate';
 import { getUid } from 'ol/util';
 
 
+
 const favDialog = document.getElementById('favDialog');
-const outputBox = document.querySelector('output');
-const selectEl = favDialog.querySelector('select');
+const selectEl = document.getElementById('fname');
 const confirmBtn = favDialog.querySelector('#confirmBtn');
 var selectedFeatureId = -1;
 
@@ -36,14 +36,17 @@ selectEl.addEventListener('change', (e) => {
 });
 
 favDialog.onLoaded = function(args) {
-  if (selectedFeatureId >= 0) {
 
-  }
 }
 
 // "Confirm" button of form triggers "close" on dialog because of [method="dialog"]
 favDialog.addEventListener('close', () => {
-  
+  if (selectedFeatureId >= 0) {
+    
+    var test = planningAppsSource.getFeatureById(selectedFeatureId);
+    test.set('name', selectEl.value);
+    alert(selectedFeatureId);
+  }
 });
 
 
@@ -61,7 +64,7 @@ class DrawTerritoryControl extends Control {
     
 
     const button = document.createElement('button');
-    button.innerHTML = '<i class="fa-solid fa-draw-polygon"></i>';
+    button.innerHTML = '<i class="fa-solid fa-download"></i>'; //fa-draw-polygon
 
     const element = document.createElement('div');
     element.className = 'draw-territory ol-unselectable ol-control';
@@ -77,7 +80,7 @@ class DrawTerritoryControl extends Control {
   enabled = false;
 
   handleDrawTerritory() {
-    if(this.enabled && currentDraw) {
+ /*   if(this.enabled && currentDraw) {
       currentDraw.finishDrawing();
       this.enabled = false;
       this.element.classList.remove("drawActive");
@@ -88,7 +91,15 @@ class DrawTerritoryControl extends Control {
       map.addInteraction(snap);
       this.enabled = true;
       this.element.classList.add("drawActive");
-    }
+    }*/
+    var format = new GeoJSON(); 
+    var geoJsonStr = format.writeFeatures(planningAppsSource.getFeatures());
+
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(JSON.parse(geoJsonStr), null, 2));
+    var dlAnchorElem = document.getElementById('downloadAnchorElem');
+    dlAnchorElem.setAttribute("href",     dataStr     );
+    dlAnchorElem.setAttribute("download", "cities.json");
+    dlAnchorElem.click();
   }
 }
 
@@ -121,6 +132,8 @@ class DrawCityControl extends Control {
 
       this.enabled = false;
       this.element.classList.remove("drawActive");
+      map.removeInteraction(currentDraw);
+      map.removeInteraction(snap);
     } else {
       currentDraw = drawCity;
       map.addInteraction(currentDraw);
@@ -186,7 +199,7 @@ const gj = {
     {
       "type": "Feature",
       "properties": {
-          "name": "Missing Person",
+          "name": "Wheloon",
           "styleTemplate": "City",
           "dynamicScale": [
             {"parameter": ["image", "radius"],
@@ -340,7 +353,8 @@ var planningAppsLayer = new VectorLayer({
       }
     }
     return baseStyle;
-  }
+  },
+  declutter: true,
 });
 
 function buildStyle(feature, resolution){
@@ -383,10 +397,12 @@ drawCity.on('drawend', function(event) {
   var fid = getUid(event.feature);
   
   event.feature.setId(fid);
+  selectedFeatureId = fid;
   event.feature.set('name', "TestName");
   event.feature.set('styleTemplate', 'City');
 
-  //favDialog.showModal();
+  favDialog.showModal();
+
 })
 
 const snap = new Snap({
