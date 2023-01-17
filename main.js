@@ -45,7 +45,6 @@ favDialog.addEventListener('close', () => {
     
     var test = planningAppsSource.getFeatureById(selectedFeatureId);
     test.set('name', selectEl.value);
-    alert(selectedFeatureId);
   }
 });
 
@@ -179,14 +178,14 @@ styles['Territory'] = new Style({
 styles['City'] = new Style({
   image: new Circle({
     fill: new Fill({color: 'black'}),
-    radius: 5,
+    radius: 6,
   }),
   text: new Text({
     stroke: new Stroke({
       color: 'white',
-      width: 1
+      width: 2
     }),
-    font: '14px serif',
+    font: '16px serif',
     offsetY: -12
   })
 })
@@ -196,21 +195,139 @@ const gj = {
   "features": [
     {
       "type": "Feature",
-      "properties": {
-          "name": "Wheloon",
-          "styleTemplate": "City",
-          "dynamicScale": [
-            {"parameter": ["image", "radius"],
-             "min": 5,
-             "max": 25
-            }
-          ]
-      },
       "geometry": {
         "type": "Point",
-        "coordinates": [2381.5, 1705.5]
+        "coordinates": [
+          2079.660723963999,
+          2471.92279225945
+        ]
       },
+      "properties": {
+        "name": "Thunder Stone",
+        "styleTemplate": "City"
+      },
+      "id": "80"
     },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2088.3528355788962,
+          2901.491151079794
+        ]
+      },
+      "properties": {
+        "name": "Daggerfall",
+        "styleTemplate": "City"
+      },
+      "id": "95"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2136.596627808943,
+          2807.9315669627567
+        ]
+      },
+      "properties": {
+        "name": "Shadowdale",
+        "styleTemplate": "City"
+      },
+      "id": "100"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2311.59912645543,
+          2975.9971787847176
+        ]
+      },
+      "properties": {
+        "name": "Zenthil Keep",
+        "styleTemplate": "City"
+      },
+      "id": "105"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1899.8693700833057,
+          2359.54403335142
+        ]
+      },
+      "properties": {
+        "name": "Suzail",
+        "styleTemplate": "City"
+      },
+      "id": "70"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1946.762836192409,
+          2360.2883740833104
+        ]
+      },
+      "properties": {
+        "name": "Marsember",
+        "styleTemplate": "City"
+      },
+      "id": "65"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1954.8178528376648,
+          2485.491108902853
+        ]
+      },
+      "properties": {
+        "name": "Arabel",
+        "styleTemplate": "City"
+      },
+      "id": "85"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1986.6926284443884,
+          2608.108488939528
+        ]
+      },
+      "properties": {
+        "name": "Tilverton",
+        "styleTemplate": "City"
+      },
+      "id": "90"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2010.0394666841057,
+          2392.7059664175918
+        ]
+      },
+      "properties": {
+        "name": "Wheloon",
+        "styleTemplate": "City"
+      },
+      "id": "75"
+    }
   ]
 };
 
@@ -240,21 +357,11 @@ const wm_rough = new ImageLayer({
 const cormyr_labeled = new ImageLayer({
   title: 'Cormyr',
   source: new Static({
-    url: 'sourcemaps/cormyr-labeled.png',
+    url: 'sourcemaps/cormyr-unlabeled.png',
     projection: projection,
     imageExtent: extent2,
   }),
   minZoom: 3,
-});
-
-const wheloon = new ImageLayer({
-  title: 'Wheloon',
-  source: new Static({
-    url: 'sourcemaps/wheloon.jpg',
-    projection: projection,
-    imageExtent: extent3,
-  }),
-  minZoom: 8,
 });
 
 const shadowdale = new ImageLayer({
@@ -270,43 +377,12 @@ const shadowdale = new ImageLayer({
 const shadowdale_rough = new ImageLayer({
   title: 'Shadowdale (Explored)',
   source: new Static({
-    url: 'sourcemaps/shadowdale-bw.png',
+    url: 'sourcemaps/shadowdale-sepia.png',
     projection: projection,
     imageExtent: extent5,
   }),
   minZoom: 8,
 });
-
-
-const baseMaps = new LayerGroup({
-  title: 'Continent',
-  visible: true,
-  layers: [wm_full, wm_rough],
-});
-
-const overlayMaps = new LayerGroup({
-  title: 'Detail Maps',
-  visible: true,
-  layers: [cormyr_labeled, wheloon, shadowdale, shadowdale_rough],
-});
-
-const map = new Map({
-  controls: defaultControls().extend([new DrawTerritoryControl(), new DrawCityControl()]),
-  layers: [baseMaps, overlayMaps],
-  target: 'map',
-  view: new View({
-    projection: projection,
-    center: getCenter(extent),
-    zoom: 2,
-    maxZoom: 16,
-  }),
-});
-
-const layerSwitcher = new LayerSwitcher({
-  reverse: true,
-  groupSelectStyle: 'group'
-});
-map.addControl(layerSwitcher);
 
 var planningAppsSource = new VectorSource({
   features: new GeoJSON().readFeatures(gj),
@@ -318,6 +394,7 @@ var planningAppsLayer = new VectorLayer({
   title: 'marker',
   visible: true,
   source: planningAppsSource,
+  zIndex: 10,
   style: function(feature, resolution){
     var baseStyle;
     if (styles[feature.get('styleTemplate')]) {
@@ -355,6 +432,60 @@ var planningAppsLayer = new VectorLayer({
   declutter: true,
 });
 
+const cormyrMap = new LayerGroup({
+  title: 'Eastern Heartlands',
+  visible: true,
+  combine: true,
+  zIndex: 10,
+  layers: [cormyr_labeled, planningAppsLayer],
+});
+
+const wheloon = new ImageLayer({
+  title: 'Wheloon',
+  source: new Static({
+    url: 'sourcemaps/wheloon.jpg',
+    projection: projection,
+    imageExtent: extent3,
+  }),
+  minZoom: 8,
+  zIndex: 100,
+});
+
+
+const baseMaps = new LayerGroup({
+  title: 'Continent',
+  visible: true,
+  layers: [wm_full, wm_rough],
+});
+
+const overlayMaps = new LayerGroup({
+  title: 'Detail Maps',
+  visible: true,
+  layers: [cormyrMap, wheloon, shadowdale, shadowdale_rough],
+});
+
+const map = new Map({
+  controls: defaultControls().extend([new DrawTerritoryControl(), new DrawCityControl()]),
+  layers: [baseMaps, overlayMaps],
+  target: 'map',
+  view: new View({
+    projection: projection,
+    center: getCenter(extent),
+    zoom: 2,
+    maxZoom: 16,
+  }),
+});
+
+const layerSwitcher = new LayerSwitcher({
+  reverse: true,
+  groupSelectStyle: 'group'
+});
+map.addControl(layerSwitcher);
+
+
+
+
+
 function buildStyle(feature, resolution){
   var style = new Style();
 
@@ -362,7 +493,7 @@ function buildStyle(feature, resolution){
 }
 
 // Add the layer to the map
-map.addLayer(planningAppsLayer);
+//map.addLayer(planningAppsLayer);
 
 map.getView().on('change:resolution', (event) => {
   console.log(event);
