@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/x-icon" href="https://openlayers.org/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Using OpenLayers with Vite</title>
+    <title>Tales of Draco Morghulis - Map</title>
     <script type="module" src="./main.js"></script>
   </head>
   <body>
@@ -21,17 +21,18 @@
         </p>
         <p>
           <label>Type:
-            <select>
-              <option value="default">Border</option>
-              <option>Major Road</option>
-              <option>Minor Road</option>
-              <option>Footpath</option>
+            <select id="ftype" name="ftype">
+              <option value="default">MajorRoad</option>
+              <option>MinorRoad</option>
+              <option>Path</option>
+              <option>City</option>
+              <option>River</option>
+              <option>Lake</option>
+              <option>Ocean</option>
+              <option>Mountain</option>
+              <option>Forest</option>
+              <option>Desert</option>
             </select>
-          </label>
-        </p>
-        <p>
-          <label>Color:
-            <input type="color" id="fcolor" name="fcolor" value="#000000">
           </label>
         </p>
         <div>

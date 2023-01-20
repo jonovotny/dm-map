@@ -1,5 +1,4 @@
+// vite.config.js
 export default {
-  build: {
-    sourcemap: true,
-  }
+  base: '/worldmap/'
 }
