@@ -50,3 +50,16 @@ html, body {
 .ol-touch .download {
   top: 150px;
 }
+
+.editmode {
+  top: 170px;
+  left: .5em;
+}
+
+.ol-touch .editmode {
+  top: 185px;
+}
+
+.editmode button{
+  float: left;
+}

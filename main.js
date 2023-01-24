@@ -50,6 +50,47 @@ favDialog.addEventListener('close', () => {
 // Define rotate to north control.
 //
 
+class EditModeControl extends Control {
+  /**
+   * @param {Object} [opt_options] Control options.
+   */
+  constructor(opt_options) {
+    const options = opt_options || {};
+    
+    const button_edit = document.createElement('button');
+    button_edit.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
+
+    const button_point = document.createElement('button');
+    button_point.innerHTML = '•';
+
+    const button_line = document.createElement('button');
+    button_line.innerHTML = '<i class="fa-solid fa-slash"></i>';
+
+    const button_area = document.createElement('button');
+    button_area.innerHTML = '<i class="fa-solid fa-draw-polygon"></i>';
+
+    const element = document.createElement('div');
+    element.className = 'editmode ol-unselectable ol-control';
+    element.appendChild(button_edit);
+    element.appendChild(button_point);
+    element.appendChild(button_line);
+    element.appendChild(button_area);
+
+    super({
+      element: element,
+      target: options.target,
+    });
+
+    //button.addEventListener('click', this.handleEditMode.bind(this), false);
+  }
+  enabled = false;
+
+  handleEditMode() {
+
+  }
+}
+
+
 class DownloadGeoJsonControl extends Control {
   /**
    * @param {Object} [opt_options] Control options.
@@ -522,7 +563,7 @@ const snap = new Snap({
 
 
 const map = new Map({
-  controls: defaultControls().extend([new DrawRoadControl(), new DrawCityControl(), new DownloadGeoJsonControl()]),
+  controls: defaultControls().extend([new DrawRoadControl(), new DrawCityControl(), new DownloadGeoJsonControl(), new EditModeControl()]),
   layers: [baseMaps, overlayMaps],
   target: 'map',
   view: new View({
