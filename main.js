@@ -109,9 +109,17 @@ class EditModeControl extends Control {
     if (!this.active) {
       var children = Array.from(this.element.childNodes);
       children.forEach(function(child){
-        if(child)
         child.classList.remove("hiddenElement");
       });
+      var select_layer = document.getElementById('select_layer');
+      if(select_layer.options.length) {
+        this.editableVectorSources.forEach(function(layerName){
+          var opt = document.createElement('option');
+          opt.value = layerName;
+          opt.text = layerName;
+          select_layer.options.add(opt);
+        });
+      }
       this.active = true;
     } else {
       var children = Array.from(this.element.childNodes);
