@@ -59,15 +59,32 @@ class EditModeControl extends Control {
     
     const button_edit = document.createElement('button');
     button_edit.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
-
+    button_edit.id = "button_edit";
+    
     const button_point = document.createElement('button');
     button_point.innerHTML = '•';
+    button_point.classList.add("hiddenElement");
+    button_point.id = "button_point";
 
     const button_line = document.createElement('button');
     button_line.innerHTML = '<i class="fa-solid fa-slash"></i>';
+    button_line.classList.add("hiddenElement");
+    button_line.id = "button_line";
 
     const button_area = document.createElement('button');
     button_area.innerHTML = '<i class="fa-solid fa-draw-polygon"></i>';
+    button_area.classList.add("hiddenElement");
+    button_area.id = "button_area";
+
+    const button_modify = document.createElement('button');
+    button_modify.innerHTML = '<i class="fa-solid fa-up-down-left-right"></i>';
+    button_modify.classList.add("hiddenElement");
+    button_modify.id = "button_modify";
+
+    const select_layer = document.createElement('select');
+    select_layer.classList.add("hiddenElement");
+    select_layer.id = "select_layer";
+
 
     const element = document.createElement('div');
     element.className = 'editmode ol-unselectable ol-control';
@@ -75,18 +92,36 @@ class EditModeControl extends Control {
     element.appendChild(button_point);
     element.appendChild(button_line);
     element.appendChild(button_area);
+    element.appendChild(button_modify);
+    element.appendChild(select_layer);
 
     super({
       element: element,
       target: options.target,
     });
 
-    //button.addEventListener('click', this.handleEditMode.bind(this), false);
+    button_edit.addEventListener('click', this.handleEditMode.bind(this), false);
   }
-  enabled = false;
+
+  active = false;
 
   handleEditMode() {
-
+    if (!this.active) {
+      var children = Array.from(this.element.childNodes);
+      children.forEach(function(child){
+        if(child)
+        child.classList.remove("hiddenElement");
+      });
+      this.active = true;
+    } else {
+      var children = Array.from(this.element.childNodes);
+      children.forEach(function(child){
+        if(child.id != "button_edit"){
+          child.classList.add("hiddenElement");
+        }
+      });
+      this.active = false;
+    }
   }
 }
 
@@ -219,6 +254,8 @@ const extent2 = [1603, 2032, 2782, 3022];
 const extent3 = [2009, 2392, 2011.032, 2393.516];
 const extent4 = [2135, 2807, 2138.107, 2808.997];
 const extent5 = [2135, 2807, 2138.107, 2808.997];
+
+var editableVectorSources = {};
 
 const projection = new Projection({
   code: 'xkcd-image',
@@ -438,6 +475,11 @@ var planningAppsSource = new VectorSource({
   url: 'sourcemaps/markers.geojson'
 });
 
+var shadowdaleSource = new VectorSource({
+  format: new GeoJSON(),
+  url: 'sourcemaps/markers.geojson'
+});
+
 // Create a vector layer to display the features within the GeoJSON source and
 // applies a simple icon style to all features
 var planningAppsLayer = new VectorLayer({
@@ -519,6 +561,9 @@ const overlayMaps = new LayerGroup({
   visible: true,
   layers: [roadsAndCities, cormyrMap, wheloon, shadowdale, shadowdale_rough],
 });
+
+editableVectorSources["Faerun-rough"] = planningAppsSource;
+editableVectorSources["Shadowdale"] = shadowdaleSource;
 
 const select = new Select();
 
