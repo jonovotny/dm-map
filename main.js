@@ -30,6 +30,11 @@ var selectedFeatureId = -1;
 
 var currentDraw;
 var currentSelect;
+var editableVectorSources = {};
+var drawElement = new Draw({
+  type: 'LineString',
+  source: planningAppsSource});
+
 
 
 
@@ -101,34 +106,62 @@ class EditModeControl extends Control {
     });
 
     button_edit.addEventListener('click', this.handleEditMode.bind(this), false);
+    button_point.addEventListener('click', this.handleDrawStart.bind(this), false);
+    button_line.addEventListener('click', this.handleDrawStart.bind(this), false);
+    button_area.addEventListener('click', this.handleDrawStart.bind(this), false);
   }
 
   active = false;
+  draw = false;
 
   handleEditMode() {
-    if (!this.active) {
-      var children = Array.from(this.element.childNodes);
-      children.forEach(function(child){
-        child.classList.remove("hiddenElement");
-      });
-      var select_layer = document.getElementById('select_layer');
-      if(select_layer.options.length) {
-        this.editableVectorSources.forEach(function(layerName){
-          var opt = document.createElement('option');
-          opt.value = layerName;
-          opt.text = layerName;
-          select_layer.options.add(opt);
-        });
-      }
-      this.active = true;
+    if (this.draw) {
+      button_edit.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
+
     } else {
-      var children = Array.from(this.element.childNodes);
-      children.forEach(function(child){
-        if(child.id != "button_edit"){
-          child.classList.add("hiddenElement");
+      if (!this.active) {
+        var children = Array.from(this.element.childNodes);
+        children.forEach(function(child){
+          child.classList.remove("hiddenElement");
+        });
+        var select_layer = document.getElementById('select_layer');
+        if(!select_layer.options.length) {
+          Object.keys(editableVectorSources).forEach(function(layerName){
+            var opt = document.createElement('option');
+            opt.value = layerName;
+            opt.text = layerName;
+            select_layer.options.add(opt);
+          });
         }
-      });
-      this.active = false;
+        this.active = true;
+      } else {
+        this.closeMenu();
+      }
+    }
+  }
+
+  closeMenu() {
+    var children = Array.from(this.element.childNodes);
+    children.forEach(function(child){
+      if(child.id != "button_edit"){
+        child.classList.add("hiddenElement");
+      }
+    });
+    this.active = false;
+  }
+
+  handleDrawStart(event) {
+    if(this.draw) {
+      console.log(this);
+      this.closeMenu();
+      map.removeInteraction(drawElement);
+      this.draw = false;
+    } else {
+      button_edit.innerHTML = event.currentTarget.innerHTML;
+      this.closeMenu();
+      drawElement = new Draw({type: 'Point', source: planningAppsSource});
+      map.addInteraction(drawElement);
+      this.draw = true;
     }
   }
 }
@@ -263,7 +296,6 @@ const extent3 = [2009, 2392, 2011.032, 2393.516];
 const extent4 = [2135, 2807, 2138.107, 2808.997];
 const extent5 = [2135, 2807, 2138.107, 2808.997];
 
-var editableVectorSources = {};
 
 const projection = new Projection({
   code: 'xkcd-image',
@@ -570,8 +602,8 @@ const overlayMaps = new LayerGroup({
   layers: [roadsAndCities, cormyrMap, wheloon, shadowdale, shadowdale_rough],
 });
 
-editableVectorSources["Faerun-rough"] = planningAppsSource;
-editableVectorSources["Shadowdale"] = shadowdaleSource;
+editableVectorSources['Faerun-rough'] = planningAppsSource;
+editableVectorSources['Shadowdale'] = shadowdaleSource;
 
 const select = new Select();
 
