@@ -31,9 +31,9 @@ var selectedFeatureId = -1;
 var currentDraw;
 var currentSelect;
 var editableVectorSources = {};
-var drawElement = new Draw({
-  type: 'LineString',
-  source: planningAppsSource});
+var drawElement = new Draw();
+
+
 
 
 
@@ -70,16 +70,20 @@ class EditModeControl extends Control {
     button_point.innerHTML = '•';
     button_point.classList.add("hiddenElement");
     button_point.id = "button_point";
+    button_point.drawType = "Point";
 
     const button_line = document.createElement('button');
     button_line.innerHTML = '<i class="fa-solid fa-slash"></i>';
     button_line.classList.add("hiddenElement");
     button_line.id = "button_line";
+    button_line.drawType = "LineString";
 
     const button_area = document.createElement('button');
     button_area.innerHTML = '<i class="fa-solid fa-draw-polygon"></i>';
     button_area.classList.add("hiddenElement");
     button_area.id = "button_area";
+    button_area.drawType = "Polygon";
+    button_area.defaultStyle = "MajorRoad";
 
     const button_modify = document.createElement('button');
     button_modify.innerHTML = '<i class="fa-solid fa-up-down-left-right"></i>';
@@ -89,6 +93,7 @@ class EditModeControl extends Control {
     const select_layer = document.createElement('select');
     select_layer.classList.add("hiddenElement");
     select_layer.id = "select_layer";
+
 
 
     const element = document.createElement('div');
@@ -105,7 +110,7 @@ class EditModeControl extends Control {
       target: options.target,
     });
 
-    button_edit.addEventListener('click', this.handleEditMode.bind(this), false);
+    button_edit.addEventListener('click', this.handleOpenMenu.bind(this), false);
     button_point.addEventListener('click', this.handleDrawStart.bind(this), false);
     button_line.addEventListener('click', this.handleDrawStart.bind(this), false);
     button_area.addEventListener('click', this.handleDrawStart.bind(this), false);
@@ -114,7 +119,7 @@ class EditModeControl extends Control {
   active = false;
   draw = false;
 
-  handleEditMode() {
+  handleOpenMenu() {
     if (this.draw) {
       button_edit.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
 
@@ -163,6 +168,16 @@ class EditModeControl extends Control {
       map.addInteraction(drawElement);
       this.draw = true;
     }
+  }
+
+  handleDrawEnd(event) {
+    var fid = getUid(event.feature);
+    
+    event.feature.setId(fid);
+    selectedFeatureId = fid;
+    event.feature.set('styleTemplate', 'City');
+  
+    favDialog.showModal();
   }
 }
 
