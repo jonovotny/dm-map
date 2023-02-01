@@ -31,8 +31,9 @@ var selectedFeatureId = -1;
 var currentDraw;
 var currentSelect;
 var editableVectorSources = {};
-var drawElement = new Draw();
-
+var drawElement = null;
+var snap = null;
+var editMode = true;
 
 
 
@@ -123,6 +124,10 @@ class EditModeControl extends Control {
     if (this.draw) {
       button_edit.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
 
+      map.removeInteraction(drawElement);
+      map.removeInteraction(snap);
+      this.draw = false;
+
     } else {
       if (!this.active) {
         var children = Array.from(this.element.childNodes);
@@ -160,15 +165,30 @@ class EditModeControl extends Control {
       console.log(this);
       this.closeMenu();
       map.removeInteraction(drawElement);
-      this.draw = false;
+      map.removeInteraction(snap);
+      this.draw = false;  
     } else {
       button_edit.innerHTML = event.currentTarget.innerHTML;
       this.closeMenu();
-      drawElement = new Draw({type: 'Point', source: planningAppsSource});
+
+      map.removeInteraction(drawElement);
+      map.removeInteraction(snap);
+      
+      drawElement = new Draw({
+        type: event.currentTarget.drawType,
+        source: editableVectorSources[select_layer.value]});
+
+      drawElement.on('drawend',this.handleDrawEnd);
+
+      snap = new Snap({
+        source: editableVectorSources[select_layer.value]});
+
       map.addInteraction(drawElement);
+      map.addInteraction(snap);
       this.draw = true;
     }
   }
+
 
   handleDrawEnd(event) {
     var fid = getUid(event.feature);
@@ -546,7 +566,13 @@ var planningAppsLayer = new VectorLayer({
     if (styles[feature.get('styleTemplate')]) {
       baseStyle = styles[feature.get('styleTemplate')].clone();
     } else {
-      baseStyle = new Style();
+      baseStyle = new Style({});
+    }
+    if (editMode && !baseStyle.getStroke()) {
+      baseStyle.setStroke(new Stroke({
+        color: 'orange',
+        width: 2
+      }));
     }
     return baseStyle;
   },
@@ -657,9 +683,7 @@ drawCity.on('drawend', function(event) {
 
 })
 
-const snap = new Snap({
-  source: planningAppsSource,
-});
+
 
 
 const map = new Map({
