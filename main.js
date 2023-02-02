@@ -22,10 +22,9 @@ import { getUid } from 'ol/util';
 
 
 
-const favDialog = document.getElementById('favDialog');
+
 const nameElement = document.getElementById('fname');
 const typeElement = document.getElementById('ftype');
-const confirmBtn = favDialog.querySelector('#confirmBtn');
 var selectedFeatureId = -1;
 
 var currentDraw;
@@ -38,17 +37,6 @@ var editMode = true;
 
 
 
-
-// "Confirm" button of form triggers "close" on dialog because of [method="dialog"]
-favDialog.addEventListener('close', () => {
-  if (selectedFeatureId >= 0) {
-    
-    var f = planningAppsSource.getFeatureById(selectedFeatureId);
-    f.set('name', nameElement.value);
-    f.set('styleTemplate', typeElement.value);
-
-  }
-});
 
 
 
@@ -72,12 +60,14 @@ class EditModeControl extends Control {
     button_point.classList.add("hiddenElement");
     button_point.id = "button_point";
     button_point.drawType = "Point";
+    button_point.defaultStyle = "City";
 
     const button_line = document.createElement('button');
     button_line.innerHTML = '<i class="fa-solid fa-slash"></i>';
     button_line.classList.add("hiddenElement");
     button_line.id = "button_line";
     button_line.drawType = "LineString";
+    button_line.defaultStyle = "MajorRoad";
 
     const button_area = document.createElement('button');
     button_area.innerHTML = '<i class="fa-solid fa-draw-polygon"></i>';
@@ -91,11 +81,16 @@ class EditModeControl extends Control {
     button_modify.classList.add("hiddenElement");
     button_modify.id = "button_modify";
 
+    const button_download = document.createElement('button');
+    button_download.innerHTML = '<i class="fa-solid fa-download"></i>';
+    button_download.classList.add("hiddenElement");
+    button_download.id = "button_download";
+
     const select_layer = document.createElement('select');
     select_layer.classList.add("hiddenElement");
     select_layer.id = "select_layer";
 
-
+    const dialog_style = document.getElementById('dialog_style');
 
     const element = document.createElement('div');
     element.className = 'editmode ol-unselectable ol-control';
@@ -105,6 +100,7 @@ class EditModeControl extends Control {
     element.appendChild(button_area);
     element.appendChild(button_modify);
     element.appendChild(select_layer);
+    element.appendChild(button_download);
 
     super({
       element: element,
@@ -115,14 +111,31 @@ class EditModeControl extends Control {
     button_point.addEventListener('click', this.handleDrawStart.bind(this), false);
     button_line.addEventListener('click', this.handleDrawStart.bind(this), false);
     button_area.addEventListener('click', this.handleDrawStart.bind(this), false);
+
+    button_download.addEventListener('click', this.handleDownload.bind(this), false);
+    
+    dialog_style.addEventListener('close', this.handleStyleSelection.bind(this), false);
+    
+
   }
 
   active = false;
   draw = false;
 
+
+  handleStyleSelection() {
+    if (selectedFeatureId >= 0) {
+      var f = editableVectorSources[select_layer.value].getFeatureById(selectedFeatureId);
+      f.set('name', nameElement.value);
+      f.set('styleTemplate', typeElement.value);
+      selectedFeatureId = -1;
+    }
+  }
+
   handleOpenMenu() {
     if (this.draw) {
       button_edit.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
+      button_edit.defaultStyle = null;
 
       map.removeInteraction(drawElement);
       map.removeInteraction(snap);
@@ -169,6 +182,7 @@ class EditModeControl extends Control {
       this.draw = false;  
     } else {
       button_edit.innerHTML = event.currentTarget.innerHTML;
+      button_edit.defaultStyle = event.currentTarget.defaultStyle;
       this.closeMenu();
 
       map.removeInteraction(drawElement);
@@ -195,17 +209,31 @@ class EditModeControl extends Control {
     
     event.feature.setId(fid);
     selectedFeatureId = fid;
-    event.feature.set('styleTemplate', 'City');
+    event.feature.set('styleTemplate', button_edit.defaultStyle);
   
-    favDialog.showModal();
+    dialog_style.showModal();
+  }
+
+  handleDownload() {
+    var format = new GeoJSON(); 
+    var geoJsonStr = format.writeFeatures(editableVectorSources[select_layer.value].getFeatures());
+
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(JSON.parse(geoJsonStr), null, 2));
+    var dlAnchorElem = document.getElementById('downloadAnchorElem');
+    dlAnchorElem.setAttribute("href",     dataStr     );
+    dlAnchorElem.setAttribute("download", select_layer.value + ".geojson");
+    dlAnchorElem.click();
+    this.closeMenu();
   }
 }
 
 
+// "Confirm" button of form triggers "close" on dialog because of [method="dialog"]
+
+
+/*
+
 class DownloadGeoJsonControl extends Control {
-  /**
-   * @param {Object} [opt_options] Control options.
-   */
   constructor(opt_options) {
     const options = opt_options || {};
     
@@ -228,7 +256,7 @@ class DownloadGeoJsonControl extends Control {
 
   handleDownload() {
     var format = new GeoJSON(); 
-    var geoJsonStr = format.writeFeatures(planningAppsSource.getFeatures());
+    var geoJsonStr = format.writeFeatures(heartlands_pc_src.getFeatures());
 
     var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(JSON.parse(geoJsonStr), null, 2));
     var dlAnchorElem = document.getElementById('downloadAnchorElem');
@@ -239,9 +267,6 @@ class DownloadGeoJsonControl extends Control {
 }
 
 class DrawRoadControl extends Control {
-  /**
-   * @param {Object} [opt_options] Control options.
-   */
   constructor(opt_options) {
     const options = opt_options || {};
     
@@ -281,9 +306,6 @@ class DrawRoadControl extends Control {
 }
 
 class DrawCityControl extends Control {
-  /**
-   * @param {Object} [opt_options] Control options.
-   */
   constructor(opt_options) {
     const options = opt_options || {};
     
@@ -319,7 +341,7 @@ class DrawCityControl extends Control {
       this.element.classList.add("drawActive");
     }
   }
-}
+}*/
 
 
 // Map views always need a projection.  Here we just want to map image
@@ -487,7 +509,9 @@ stylesLabel['City'] = new Style({
 })
 
 
-const wm_full = new ImageLayer({
+//ImageLayers
+
+const faerun_gm = new ImageLayer({
   title: 'Faerun (GM)',
   type: 'base',
   visible: false,
@@ -499,8 +523,8 @@ const wm_full = new ImageLayer({
   zIndex:8
 });
 
-const wm_rough = new ImageLayer({
-  title: 'Faerun (Overview)',
+const faerun_pc = new ImageLayer({
+  title: 'Faerun (Players)',
   type: 'base',
   visible: true,
   source: new Static({
@@ -511,8 +535,8 @@ const wm_rough = new ImageLayer({
   zIndex:8
 });
 
-const cormyr_unlabeled = new ImageLayer({
-  title: 'Cormyr',
+const heartlands_pc = new ImageLayer({
+  title: 'Western Heartlands (Players)',
   source: new Static({
     url: 'sourcemaps/cormyr-unlabeled.png',
     projection: projection,
@@ -522,7 +546,7 @@ const cormyr_unlabeled = new ImageLayer({
   zIndex: 12
 });
 
-const shadowdale = new ImageLayer({
+const shadowdale_gm = new ImageLayer({
   title: 'Shadowdale (GM)',
   source: new Static({
     url: 'sourcemaps/shadowdale-surrounding.jpg',
@@ -534,8 +558,8 @@ const shadowdale = new ImageLayer({
   visible: false
 });
 
-const shadowdale_rough = new ImageLayer({
-  title: 'Shadowdale (Explored)',
+const shadowdale_pc = new ImageLayer({
+  title: 'Shadowdale (Players)',
   source: new Static({
     url: 'sourcemaps/shadowdale-sepia.png',
     projection: projection,
@@ -545,22 +569,35 @@ const shadowdale_rough = new ImageLayer({
   zIndex: 40
 });
 
-var planningAppsSource = new VectorSource({
+const wheloon_pc = new ImageLayer({
+  title: 'wheloon',
+  source: new Static({
+    url: 'sourcemaps/wheloon.jpg',
+    projection: projection,
+    imageExtent: extent3,
+  }),
+  minZoom: 8,
+  zIndex: 100,
+});
+
+//Vector Sources
+
+var heartlands_pc_src = new VectorSource({
   format: new GeoJSON(),
   url: 'sourcemaps/markers.geojson'
 });
 
-var shadowdaleSource = new VectorSource({
+var shadowdale_pc_src = new VectorSource({
   format: new GeoJSON(),
-  url: 'sourcemaps/markers.geojson'
+  url: 'sourcemaps/Shadowdale (Players).geojson'
 });
 
-// Create a vector layer to display the features within the GeoJSON source and
-// applies a simple icon style to all features
-var planningAppsLayer = new VectorLayer({
-  title: 'Markers',
+//Vector Layers
+
+var heartlands_pc_markers = new VectorLayer({
+  title: 'Western Heratlands (Markers)',
   visible: true,
-  source: planningAppsSource,
+  source: heartlands_pc_src,
   style: function(feature, resolution){
     var baseStyle;
     if (styles[feature.get('styleTemplate')]) {
@@ -578,10 +615,10 @@ var planningAppsLayer = new VectorLayer({
   },
 });
 
-var planningAppsLayer2 = new VectorLayer({
-  title: 'Labels',
+var heartlands_pc_labels = new VectorLayer({
+  title: 'Western Heartlands (Labels)',
   visible: true,
-  source: planningAppsSource,
+  source: heartlands_pc_src,
   style: function(feature, resolution){
     var baseStyle;
     if (stylesLabel[feature.get('styleTemplate')]) {
@@ -603,49 +640,99 @@ var planningAppsLayer2 = new VectorLayer({
   declutter: true,
 });
 
-const cormyrMap = new LayerGroup({
+var shadowdale_pc_markers = new VectorLayer({
+  title: 'Shadowdale (Markers)',
+  visible: true,
+  source: shadowdale_pc_src,
+  style: function(feature, resolution){
+    var baseStyle;
+    if (styles[feature.get('styleTemplate')]) {
+      baseStyle = styles[feature.get('styleTemplate')].clone();
+    } else {
+      baseStyle = new Style({});
+    }
+    if (editMode && !baseStyle.getStroke()) {
+      baseStyle.setStroke(new Stroke({
+        color: 'orange',
+        width: 2
+      }));
+    }
+    return baseStyle;
+  },
+  zIndex: 45,
+  minZoom: 8,
+});
+
+var shadowdale_pc_labels = new VectorLayer({
+  title: 'Shadowdale (Labels)',
+  visible: true,
+  source: shadowdale_pc_src,
+  style: function(feature, resolution){
+    var baseStyle;
+    if (stylesLabel[feature.get('styleTemplate')]) {
+      baseStyle = stylesLabel[feature.get('styleTemplate')].clone();
+    } else {
+      baseStyle = new Style();
+    }
+
+    var label = feature.get('name');
+
+      if (label) {
+        if (baseStyle.getText()) {
+          baseStyle.getText().setText(label);
+        }
+      }
+
+    return baseStyle;
+  },
+  minZoom: 12,
+  zIndex: 50,
+  declutter: true,
+});
+
+//Layer Groups
+
+const baseMaps = new LayerGroup({
+  title: 'Continent',
+  visible: true,
+  layers: [faerun_gm, faerun_pc],
+});
+
+const heartlands_pc_lg = new LayerGroup({
   title: 'Eastern Heartlands',
   visible: true,
   combine: true,
   zIndex: 12,
-  layers: [cormyr_unlabeled],
+  layers: [heartlands_pc, heartlands_pc_markers, heartlands_pc_labels],
 });
 
+const shadowdale_pc_lg = new LayerGroup({
+  title: 'Shadowdale (Players)',
+  visible: true,
+  combine: true,
+  zIndex: 12,
+  layers: [shadowdale_pc, shadowdale_pc_markers, shadowdale_pc_labels],
+});
+
+const overlayMaps = new LayerGroup({
+  title: 'Local Maps',
+  visible: true,
+  layers: [heartlands_pc_lg, wheloon_pc, shadowdale_gm, shadowdale_pc_lg],
+});
+
+/*
 const roadsAndCities = new LayerGroup({
   title: 'Roads and Cities',
   visible: true,
   combine: true,
   zIndex: 15,
-  layers: [planningAppsLayer, planningAppsLayer2],
-});
+  layers: [heartlands_pc_markers, heartlands_pc_labels],
+});*/
 
-const wheloon = new ImageLayer({
-  title: 'Wheloon',
-  source: new Static({
-    url: 'sourcemaps/wheloon.jpg',
-    projection: projection,
-    imageExtent: extent3,
-  }),
-  minZoom: 8,
-  zIndex: 100,
-});
+editableVectorSources['Western Heartlands (Players)'] = heartlands_pc_src;
+editableVectorSources['Shadowdale (Players)'] = shadowdale_pc_src;
 
-
-const baseMaps = new LayerGroup({
-  title: 'Continent',
-  visible: true,
-  layers: [wm_full, wm_rough],
-});
-
-const overlayMaps = new LayerGroup({
-  title: 'Detail Maps',
-  visible: true,
-  layers: [roadsAndCities, cormyrMap, wheloon, shadowdale, shadowdale_rough],
-});
-
-editableVectorSources['Faerun-rough'] = planningAppsSource;
-editableVectorSources['Shadowdale'] = shadowdaleSource;
-
+/*
 const select = new Select();
 
 const modify = new Modify({
@@ -654,7 +741,7 @@ const modify = new Modify({
 
 const drawRoad = new Draw({
   type: 'LineString',
-  source: planningAppsSource,
+  source: heartlands_pc_src,
 });
 
 drawRoad.on('drawend', function(event) {
@@ -669,7 +756,7 @@ drawRoad.on('drawend', function(event) {
 
 const drawCity = new Draw({
   type: 'Point',
-  source: planningAppsSource,
+  source: heartlands_pc_src,
 });
 
 drawCity.on('drawend', function(event) {
@@ -683,11 +770,11 @@ drawCity.on('drawend', function(event) {
 
 })
 
-
+*/
 
 
 const map = new Map({
-  controls: defaultControls().extend([new DrawRoadControl(), new DrawCityControl(), new DownloadGeoJsonControl(), new EditModeControl()]),
+  controls: defaultControls().extend([new EditModeControl()]),
   layers: [baseMaps, overlayMaps],
   target: 'map',
   view: new View({
@@ -706,7 +793,7 @@ map.addControl(layerSwitcher);
 
 
 // Add the layer to the map
-//map.addLayer(planningAppsLayer);
+//map.addLayer(heartlands_pc_markers);
 
 map.getView().on('change:resolution', (event) => {
   styles['City'].getImage().setRadius(Math.max(Math.min(styles['City'].defaultRadius/event.oldValue, 8),3));
