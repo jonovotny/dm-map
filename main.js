@@ -28,19 +28,10 @@ const typeElement = document.getElementById('ftype');
 var selectedFeatureId = -1;
 
 var editableVectorSources = {};
-var drawElement = null;
-var snap = null;
-var editMode = true;
+//var drawElement = null;
+//var snap = null;
+var editMode = false;
 
-
-
-
-
-
-
-//
-// Define rotate to north control.
-//
 
 class EditModeControl extends Control {
   /**
@@ -90,6 +81,8 @@ class EditModeControl extends Control {
 
     const dialog_style = document.getElementById('dialog_style');
 
+    
+
     const element = document.createElement('div');
     element.className = 'editmode ol-unselectable ol-control';
     element.appendChild(button_edit);
@@ -110,6 +103,8 @@ class EditModeControl extends Control {
     button_line.addEventListener('click', this.handleDrawStart.bind(this), false);
     button_area.addEventListener('click', this.handleDrawStart.bind(this), false);
 
+    button_modify.addEventListener('click', this.handleModifyStart.bind(this), false);
+
     button_download.addEventListener('click', this.handleDownload.bind(this), false);
     
     dialog_style.addEventListener('close', this.handleStyleSelection.bind(this), false);
@@ -119,6 +114,7 @@ class EditModeControl extends Control {
 
   active = false;
   draw = false;
+  interactions = [];
 
 
   handleStyleSelection() {
@@ -130,15 +126,28 @@ class EditModeControl extends Control {
     }
   }
 
+  clearInteractions() {
+    this.interactions.forEach(function(inter) {
+      map.removeInteraction(inter);
+    });
+    this.interactions = [];
+  }
+
+  addInteraction(inter) {
+    map.addInteraction(inter);
+    this.interactions.push(inter);
+  };
+
   handleOpenMenu() {
     if (this.draw) {
       button_edit.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
       button_edit.defaultStyle = null;
 
-      map.removeInteraction(drawElement);
-      map.removeInteraction(snap);
+      this.clearInteractions();
+      editMode = false;
       this.draw = false;
-
+      editableVectorSources[select_layer.value].changed();
+      
     } else {
       if (!this.active) {
         var children = Array.from(this.element.childNodes);
@@ -175,28 +184,24 @@ class EditModeControl extends Control {
     if(this.draw) {
       console.log(this);
       this.closeMenu();
-      map.removeInteraction(drawElement);
-      map.removeInteraction(snap);
+      this.clearInteractions();
       this.draw = false;  
     } else {
       button_edit.innerHTML = event.currentTarget.innerHTML;
       button_edit.defaultStyle = event.currentTarget.defaultStyle;
       this.closeMenu();
-
-      map.removeInteraction(drawElement);
-      map.removeInteraction(snap);
+      this.clearInteractions();
       
-      drawElement = new Draw({
+      var drawElement = new Draw({
         type: event.currentTarget.drawType,
         source: editableVectorSources[select_layer.value]});
 
       drawElement.on('drawend',this.handleDrawEnd);
+      this.addInteraction(drawElement);
 
-      snap = new Snap({
-        source: editableVectorSources[select_layer.value]});
+      this.addInteraction(new Snap({
+        source: editableVectorSources[select_layer.value]}));
 
-      map.addInteraction(drawElement);
-      map.addInteraction(snap);
       this.draw = true;
     }
   }
@@ -210,6 +215,25 @@ class EditModeControl extends Control {
     event.feature.set('styleTemplate', button_edit.defaultStyle);
   
     dialog_style.showModal();
+  }
+
+  handleModifyStart(event) {
+    button_edit.innerHTML = event.currentTarget.innerHTML;
+    button_edit.defaultStyle = event.currentTarget.defaultStyle;
+    this.closeMenu();
+    this.clearInteractions();
+      
+    var select = new Select({
+      wrapX: false,
+    });
+    this.addInteraction(select);
+
+    this.addInteraction(new Modify({
+      features: select.getFeatures(),
+    }));
+    editMode = true;
+    this.draw = true;
+    editableVectorSources[select_layer.value].changed();
   }
 
   handleDownload() {
