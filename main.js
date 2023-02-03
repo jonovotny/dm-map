@@ -27,8 +27,6 @@ const nameElement = document.getElementById('fname');
 const typeElement = document.getElementById('ftype');
 var selectedFeatureId = -1;
 
-var currentDraw;
-var currentSelect;
 var editableVectorSources = {};
 var drawElement = null;
 var snap = null;
@@ -228,120 +226,6 @@ class EditModeControl extends Control {
 }
 
 
-// "Confirm" button of form triggers "close" on dialog because of [method="dialog"]
-
-
-/*
-
-class DownloadGeoJsonControl extends Control {
-  constructor(opt_options) {
-    const options = opt_options || {};
-    
-
-    const button = document.createElement('button');
-    button.innerHTML = '<i class="fa-solid fa-download"></i>'; //fa-draw-polygon
-
-    const element = document.createElement('div');
-    element.className = 'download ol-unselectable ol-control';
-    element.appendChild(button);
-
-    super({
-      element: element,
-      target: options.target,
-    });
-
-    button.addEventListener('click', this.handleDownload.bind(this), false);
-  }
-  enabled = false;
-
-  handleDownload() {
-    var format = new GeoJSON(); 
-    var geoJsonStr = format.writeFeatures(heartlands_pc_src.getFeatures());
-
-    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(JSON.parse(geoJsonStr), null, 2));
-    var dlAnchorElem = document.getElementById('downloadAnchorElem');
-    dlAnchorElem.setAttribute("href",     dataStr     );
-    dlAnchorElem.setAttribute("download", "cities.json");
-    dlAnchorElem.click();
-  }
-}
-
-class DrawRoadControl extends Control {
-  constructor(opt_options) {
-    const options = opt_options || {};
-    
-
-    const button = document.createElement('button');
-    button.innerHTML = '<i class="fa-solid fa-draw-polygon"></i>'; //
-
-    const element = document.createElement('div');
-    element.className = 'draw-territory ol-unselectable ol-control';
-    element.appendChild(button);
-
-    super({
-      element: element,
-      target: options.target,
-    });
-
-    button.addEventListener('click', this.handleRoadTerritory.bind(this), false);
-  }
-  enabled = false;
-
-  handleRoadTerritory() {
-    if(this.enabled && currentDraw) {
-      currentDraw.finishDrawing();
-      this.enabled = false;
-      this.element.classList.remove("drawActive");
-      map.removeInteraction(currentDraw);
-      map.removeInteraction(snap);
-    } else {
-
-      currentDraw = drawRoad; 
-      map.addInteraction(currentDraw);
-      map.addInteraction(snap);
-      this.enabled = true;
-      this.element.classList.add("drawActive");
-    }
-  }
-}
-
-class DrawCityControl extends Control {
-  constructor(opt_options) {
-    const options = opt_options || {};
-    
-
-    const button = document.createElement('button');
-    button.innerHTML = '<i class="fa-solid fa-circle"></i>';
-
-    const element = document.createElement('div');
-    element.className = 'draw-city ol-unselectable ol-control';
-    element.appendChild(button);
-
-    super({
-      element: element,
-      target: options.target,
-    });
-
-    button.addEventListener('click', this.handleDrawCity.bind(this), false);
-  }
-  enabled = false;
-
-  handleDrawCity() {
-    if(this.enabled && currentDraw) {
-
-      this.enabled = false;
-      this.element.classList.remove("drawActive");
-      map.removeInteraction(currentDraw);
-      map.removeInteraction(snap);
-    } else {
-      currentDraw = drawCity;
-      map.addInteraction(currentDraw);
-      map.addInteraction(snap);
-      this.enabled = true;
-      this.element.classList.add("drawActive");
-    }
-  }
-}*/
 
 
 // Map views always need a projection.  Here we just want to map image
@@ -720,58 +604,8 @@ const overlayMaps = new LayerGroup({
   layers: [heartlands_pc_lg, wheloon_pc, shadowdale_gm, shadowdale_pc_lg],
 });
 
-/*
-const roadsAndCities = new LayerGroup({
-  title: 'Roads and Cities',
-  visible: true,
-  combine: true,
-  zIndex: 15,
-  layers: [heartlands_pc_markers, heartlands_pc_labels],
-});*/
-
 editableVectorSources['Western Heartlands (Players)'] = heartlands_pc_src;
 editableVectorSources['Shadowdale (Players)'] = shadowdale_pc_src;
-
-/*
-const select = new Select();
-
-const modify = new Modify({
-  features: select.getFeatures(),
-});
-
-const drawRoad = new Draw({
-  type: 'LineString',
-  source: heartlands_pc_src,
-});
-
-drawRoad.on('drawend', function(event) {
-  var fid = getUid(event.feature);
-  
-  event.feature.setId(fid);
-  event.feature.set('styleTemplate', 'MajorRoad');
-  selectedFeatureId = fid;
-
-  favDialog.showModal();
-})
-
-const drawCity = new Draw({
-  type: 'Point',
-  source: heartlands_pc_src,
-});
-
-drawCity.on('drawend', function(event) {
-  var fid = getUid(event.feature);
-  
-  event.feature.setId(fid);
-  selectedFeatureId = fid;
-  event.feature.set('styleTemplate', 'City');
-
-  favDialog.showModal();
-
-})
-
-*/
-
 
 const map = new Map({
   controls: defaultControls().extend([new EditModeControl()]),
