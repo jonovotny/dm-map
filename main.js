@@ -17,15 +17,16 @@ import {Vector as VectorLayer} from 'ol/layer';
 
 import {Draw, Modify, Select, Snap} from 'ol/interaction';
 import {Control, defaults as defaultControls} from 'ol/control';
-import { closestOnCircle } from 'ol/coordinate';
-import { getUid } from 'ol/util';
+import {getUid} from 'ol/util';
 
 
 
 
 const nameElement = document.getElementById('fname');
 const typeElement = document.getElementById('ftype');
-var selectedFeatureId = -1;
+const tooltipElement = document.getElementById('ftooltip');
+const popupElement = document.getElementById('fpopup');
+var selectedFeatureId = [];
 
 var editableVectorSources = {};
 //var drawElement = null;
@@ -81,8 +82,6 @@ class EditModeControl extends Control {
 
     const dialog_style = document.getElementById('dialog_style');
 
-    
-
     const element = document.createElement('div');
     element.className = 'editmode ol-unselectable ol-control';
     element.appendChild(button_edit);
@@ -108,8 +107,6 @@ class EditModeControl extends Control {
     button_download.addEventListener('click', this.handleDownload.bind(this), false);
     
     dialog_style.addEventListener('close', this.handleStyleSelection.bind(this), false);
-    
-
   }
 
   active = false;
@@ -118,11 +115,23 @@ class EditModeControl extends Control {
 
 
   handleStyleSelection() {
-    if (selectedFeatureId >= 0) {
-      var f = editableVectorSources[select_layer.value].getFeatureById(selectedFeatureId);
-      f.set('name', nameElement.value);
-      f.set('styleTemplate', typeElement.value);
-      selectedFeatureId = -1;
+    if (selectedFeatureId.length > 0) {
+      if (selectedFeatureId.length == 1) {
+        var f = editableVectorSources[select_layer.value].getFeatureById(selectedFeatureId[0]);
+        f.set('name', nameElement.value);
+        f.set('styleTemplate', typeElement.value);
+        if (tooltipElement.value) {
+          f.set('tooltip', tooltipElement.value)
+        }
+        if (popupElement.value) {
+          f.set('popup', popupElement.value)
+        }
+      } else {
+        selectedFeatureId.forEach(function(fid){
+          var f = editableVectorSources[select_layer.value].getFeatureById(fid);
+          f.set('styleTemplate', typeElement.value);
+        });
+      }
     }
   }
 
@@ -154,7 +163,7 @@ class EditModeControl extends Control {
         children.forEach(function(child){
           child.classList.remove("hiddenElement");
         });
-        var select_layer = document.getElementById('select_layer');
+
         if(!select_layer.options.length) {
           Object.keys(editableVectorSources).forEach(function(layerName){
             var opt = document.createElement('option');
@@ -162,6 +171,7 @@ class EditModeControl extends Control {
             opt.text = layerName;
             select_layer.options.add(opt);
           });
+          select_layer.value = select_layer.options[0].value;
         }
         this.active = true;
       } else {
@@ -182,7 +192,6 @@ class EditModeControl extends Control {
 
   handleDrawStart(event) {
     if(this.draw) {
-      console.log(this);
       this.closeMenu();
       this.clearInteractions();
       this.draw = false;  
@@ -226,6 +235,15 @@ class EditModeControl extends Control {
     var select = new Select({
       wrapX: false,
     });
+    select.addEventListener('select', function(event) {
+      if(event.selected.length === 1 && event.mapBrowserEvent.originalEvent.ctrlKey) {
+        var fid = event.selected[0].getId();
+      
+        event.selected[0].set('styleTemplate', event.selected[0].get('styleTemplate'));
+      
+        dialog_style.showModal();
+      } 
+    })
     this.addInteraction(select);
 
     this.addInteraction(new Modify({
@@ -248,9 +266,6 @@ class EditModeControl extends Control {
     this.closeMenu();
   }
 }
-
-
-
 
 // Map views always need a projection.  Here we just want to map image
 // coordinates directly to map coordinates, so we create a projection that uses
@@ -416,6 +431,27 @@ stylesLabel['City'] = new Style({
   })
 })
 
+styles['Marker'] = new Style({
+  image: new Circle({
+    fill: new Fill({color: 'black'}),
+    stroke: new Stroke({
+      color: 'white',
+      width: 1
+    }),
+    radius: 6,
+  })
+})
+styles['Marker'].defaultRadius = 6;
+stylesLabel['Marker'] = new Style({
+  text: new Text({
+    stroke: new Stroke({
+      color: 'white',
+      width: 3
+    }),
+    font: '900 16px "Font Awesome 6 Free"',
+    offsetY: -12
+  })
+})
 
 //ImageLayers
 
@@ -428,7 +464,7 @@ const faerun_gm = new ImageLayer({
     projection: projection,
     imageExtent: extent,
   }),
-  zIndex:8
+  zIndex: 10,
 });
 
 const faerun_pc = new ImageLayer({
@@ -440,7 +476,7 @@ const faerun_pc = new ImageLayer({
     projection: projection,
     imageExtent: extent,
   }),
-  zIndex:8
+  zIndex: 10,
 });
 
 const heartlands_pc = new ImageLayer({
@@ -451,7 +487,7 @@ const heartlands_pc = new ImageLayer({
     imageExtent: extent2,
   }),
   minZoom: 3,
-  zIndex: 12
+  zIndex: 100,
 });
 
 const shadowdale_gm = new ImageLayer({
@@ -462,7 +498,7 @@ const shadowdale_gm = new ImageLayer({
     imageExtent: extent4,
   }),
   minZoom: 8,
-  zIndex: 30,
+  zIndex: 190,
   visible: false
 });
 
@@ -474,7 +510,7 @@ const shadowdale_pc = new ImageLayer({
     imageExtent: extent5,
   }),
   minZoom: 8,
-  zIndex: 40
+  zIndex: 200
 });
 
 const wheloon_pc = new ImageLayer({
@@ -485,19 +521,19 @@ const wheloon_pc = new ImageLayer({
     imageExtent: extent3,
   }),
   minZoom: 8,
-  zIndex: 100,
+  zIndex: 200,
 });
 
 //Vector Sources
 
 var heartlands_pc_src = new VectorSource({
   format: new GeoJSON(),
-  url: 'sourcemaps/markers.geojson'
+  url: 'sourcemaps/western-heartlands-markers.geojson'
 });
 
 var shadowdale_pc_src = new VectorSource({
   format: new GeoJSON(),
-  url: 'sourcemaps/Shadowdale (Players).geojson'
+  url: 'sourcemaps/shadowdale-markers.geojson'
 });
 
 //Vector Layers
@@ -521,6 +557,8 @@ var heartlands_pc_markers = new VectorLayer({
     }
     return baseStyle;
   },
+  minZoom: 3,
+  zIndex: 110,
 });
 
 var heartlands_pc_labels = new VectorLayer({
@@ -546,6 +584,8 @@ var heartlands_pc_labels = new VectorLayer({
     return baseStyle;
   },
   declutter: true,
+  minZoom: 3,
+  zIndex: 120,
 });
 
 var shadowdale_pc_markers = new VectorLayer({
@@ -567,8 +607,8 @@ var shadowdale_pc_markers = new VectorLayer({
     }
     return baseStyle;
   },
-  zIndex: 45,
-  minZoom: 8,
+  zIndex: 210,
+  minZoom: 12,
 });
 
 var shadowdale_pc_labels = new VectorLayer({
@@ -585,16 +625,16 @@ var shadowdale_pc_labels = new VectorLayer({
 
     var label = feature.get('name');
 
-      if (label) {
-        if (baseStyle.getText()) {
-          baseStyle.getText().setText(label);
-        }
+    if (label) {
+      if (baseStyle.getText()) {
+        baseStyle.getText().setText(label);
       }
+    }
 
     return baseStyle;
   },
   minZoom: 12,
-  zIndex: 50,
+  zIndex: 220,
   declutter: true,
 });
 
@@ -604,13 +644,14 @@ const baseMaps = new LayerGroup({
   title: 'Continent',
   visible: true,
   layers: [faerun_gm, faerun_pc],
+  zIndex: 20,
 });
 
 const heartlands_pc_lg = new LayerGroup({
   title: 'Eastern Heartlands',
   visible: true,
   combine: true,
-  zIndex: 12,
+  zIndex: 120,
   layers: [heartlands_pc, heartlands_pc_markers, heartlands_pc_labels],
 });
 
@@ -618,7 +659,7 @@ const shadowdale_pc_lg = new LayerGroup({
   title: 'Shadowdale (Players)',
   visible: true,
   combine: true,
-  zIndex: 12,
+  zIndex: 220,
   layers: [shadowdale_pc, shadowdale_pc_markers, shadowdale_pc_labels],
 });
 
@@ -651,7 +692,6 @@ map.addControl(layerSwitcher);
 
 
 // Add the layer to the map
-//map.addLayer(heartlands_pc_markers);
 
 map.getView().on('change:resolution', (event) => {
   styles['City'].getImage().setRadius(Math.max(Math.min(styles['City'].defaultRadius/event.oldValue, 8),3));
