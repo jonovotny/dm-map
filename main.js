@@ -26,7 +26,7 @@ const nameElement = document.getElementById('fname');
 const typeElement = document.getElementById('ftype');
 const tooltipElement = document.getElementById('ftooltip');
 const popupElement = document.getElementById('fpopup');
-var selectedFeatureId = [];
+var selectedFeatures = [];
 
 var editableVectorSources = {};
 //var drawElement = null;
@@ -115,20 +115,15 @@ class EditModeControl extends Control {
 
 
   handleStyleSelection() {
-    if (selectedFeatureId.length > 0) {
-      if (selectedFeatureId.length == 1) {
-        var f = editableVectorSources[select_layer.value].getFeatureById(selectedFeatureId[0]);
+    if (selectedFeatures.length > 0) {
+      if (selectedFeatures.length == 1) {
+        var f = selectedFeatures[0];
         f.set('name', nameElement.value);
         f.set('styleTemplate', typeElement.value);
-        if (tooltipElement.value) {
-          f.set('tooltip', tooltipElement.value)
-        }
-        if (popupElement.value) {
-          f.set('popup', popupElement.value)
-        }
+        f.set('tooltip', tooltipElement.value)
+        f.set('popup', popupElement.value)
       } else {
-        selectedFeatureId.forEach(function(fid){
-          var f = editableVectorSources[select_layer.value].getFeatureById(fid);
+        selectedFeatures.forEach(function(f){
           f.set('styleTemplate', typeElement.value);
         });
       }
@@ -217,10 +212,7 @@ class EditModeControl extends Control {
 
 
   handleDrawEnd(event) {
-    var fid = getUid(event.feature);
-    
-    event.feature.setId(fid);
-    selectedFeatureId = fid;
+    selectedFeatures = [event.feature];
     event.feature.set('styleTemplate', button_edit.defaultStyle);
   
     dialog_style.showModal();
@@ -235,11 +227,26 @@ class EditModeControl extends Control {
     var select = new Select({
       wrapX: false,
     });
+
     select.addEventListener('select', function(event) {
-      if(event.selected.length === 1 && event.mapBrowserEvent.originalEvent.ctrlKey) {
-        var fid = event.selected[0].getId();
-      
-        event.selected[0].set('styleTemplate', event.selected[0].get('styleTemplate'));
+      if(event.selected.length > 0 && event.mapBrowserEvent.originalEvent.ctrlKey) {
+        selectedFeatures = event.target.getFeatures().getArray();
+        if (selectedFeatures.length > 1 ) {
+          nameElement.disabled = true;
+          tooltipElement.disabled =true;
+          popupElement.disabled =true; 
+
+          typeElement.value = selectedFeatures[0].get('styleTemplate');
+        } else {
+          nameElement.disabled = false;
+          tooltipElement.disabled = false;
+          popupElement.disabled = false;
+
+          nameElement.value = selectedFeatures[0].get('name');
+          typeElement.value = selectedFeatures[0].get('styleTemplate');
+          tooltipElement.value = selectedFeatures[0].get('tooltip');
+          popupElement.value = selectedFeatures[0].get('popup');
+        }
       
         dialog_style.showModal();
       } 
