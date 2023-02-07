@@ -476,6 +476,7 @@ stylesLabel['Marker'] = new Style({
 
 const faerun_gm = new ImageLayer({
   title: 'Faerun (GM)',
+  className: 'layer-fa-i2',
   type: 'base',
   visible: false,
   source: new Static({
@@ -488,6 +489,7 @@ const faerun_gm = new ImageLayer({
 
 const faerun_pc = new ImageLayer({
   title: 'Faerun (Players)',
+  className: 'layer-fa-l',
   type: 'base',
   visible: true,
   source: new Static({
@@ -500,6 +502,7 @@ const faerun_pc = new ImageLayer({
 
 const heartlands_pc = new ImageLayer({
   title: 'Western Heartlands (Players)',
+  className: 'layer-wh-i',
   source: new Static({
     url: 'sourcemaps/cormyr-unlabeled.png',
     projection: projection,
@@ -511,35 +514,38 @@ const heartlands_pc = new ImageLayer({
 
 const shadowdale_gm = new ImageLayer({
   title: 'Shadowdale (GM)',
+  className: 'layer-sd-i2',
   source: new Static({
     url: 'sourcemaps/shadowdale-surrounding.jpg',
     projection: projection,
     imageExtent: extent4,
   }),
-  minZoom: 8,
+  minZoom: 10,
   zIndex: 190,
   visible: false
 });
 
 const shadowdale_pc = new ImageLayer({
   title: 'Shadowdale (Players)',
+  className: 'layer-sd-i',
   source: new Static({
     url: 'sourcemaps/shadowdale-sepia.png',
     projection: projection,
     imageExtent: extent5,
   }),
-  minZoom: 8,
+  minZoom: 10,
   zIndex: 200
 });
 
 const wheloon_pc = new ImageLayer({
   title: 'wheloon',
+  className: 'layer-wl-i',
   source: new Static({
     url: 'sourcemaps/wheloon.jpg',
     projection: projection,
     imageExtent: extent3,
   }),
-  minZoom: 8,
+  minZoom: 10,
   zIndex: 200,
 });
 
@@ -559,6 +565,7 @@ var shadowdale_pc_src = new VectorSource({
 
 var heartlands_pc_markers = new VectorLayer({
   title: 'Western Heratlands (Markers)',
+  className: 'layer-wh-m',
   visible: true,
   source: heartlands_pc_src,
   style: function(feature, resolution){
@@ -582,6 +589,7 @@ var heartlands_pc_markers = new VectorLayer({
 
 var heartlands_pc_labels = new VectorLayer({
   title: 'Western Heartlands (Labels)',
+  className: 'layer-wh-l',
   visible: true,
   source: heartlands_pc_src,
   style: function(feature, resolution){
@@ -609,6 +617,7 @@ var heartlands_pc_labels = new VectorLayer({
 
 var shadowdale_pc_markers = new VectorLayer({
   title: 'Shadowdale (Markers)',
+  className: 'layer-sd-m',
   visible: true,
   source: shadowdale_pc_src,
   style: function(feature, resolution){
@@ -632,6 +641,7 @@ var shadowdale_pc_markers = new VectorLayer({
 
 var shadowdale_pc_labels = new VectorLayer({
   title: 'Shadowdale (Labels)',
+  className: 'layer-sd-l',
   visible: true,
   source: shadowdale_pc_src,
   style: function(feature, resolution){
