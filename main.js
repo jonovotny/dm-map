@@ -27,6 +27,9 @@ const nameElement = document.getElementById('fname');
 const typeElement = document.getElementById('ftype');
 const tooltipElement = document.getElementById('ftooltip');
 const popupElement = document.getElementById('fpopup');
+
+const sortOrder = ['City', 'Marker', 'Mountain', 'Ocean', 'Forest', 'Desert', 'Lake', 'MajorRoad', 'MinorRoad', 'Path', 'River'];
+
 var selectedFeatures = [];
 var select = null;
 
@@ -275,7 +278,8 @@ class EditModeControl extends Control {
 
   handleDownload() {
     var format = new GeoJSON(); 
-    var geoJsonStr = format.writeFeatures(editableVectorSources[select_layer.value].getFeatures());
+    
+    var geoJsonStr = format.writeFeatures(editableVectorSources[select_layer.value].getFeatures().sort((a,b) => {return sortOrder.findIndex((element) => element == a.get('styleTemplate')) - sortOrder.findIndex((element) => element == b.get('styleTemplate'));}));
 
     var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(JSON.parse(geoJsonStr), null, 2));
     var dlAnchorElem = document.getElementById('downloadAnchorElem');
@@ -731,6 +735,8 @@ map.getView().on('change:resolution', (event) => {
 styles['City'].getImage().setRadius(Math.max(Math.min(styles['City'].defaultRadius/map.getView().getResolution(), 8),3));
 styles['MajorRoad'].getStroke().setWidth(Math.max(Math.min(styles['MajorRoad'].defaultWidth/map.getView().getResolution(), 4),0.5));
 styles['MinorRoad'].getStroke().setWidth(Math.max(Math.min(styles['MinorRoad'].defaultWidth/map.getView().getResolution(), 3),0.25));
+
+
 
 
 
