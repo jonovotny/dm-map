@@ -17,6 +17,7 @@ import {Vector as VectorLayer} from 'ol/layer';
 
 import {Draw, Modify, Select, Snap} from 'ol/interaction';
 import {Control, defaults as defaultControls} from 'ol/control';
+import {singleClick, platformModifierKeyOnly} from 'ol/events/condition';
 import {getUid} from 'ol/util';
 
 
@@ -27,6 +28,7 @@ const typeElement = document.getElementById('ftype');
 const tooltipElement = document.getElementById('ftooltip');
 const popupElement = document.getElementById('fpopup');
 var selectedFeatures = [];
+var select = null;
 
 var editableVectorSources = {};
 //var drawElement = null;
@@ -113,7 +115,6 @@ class EditModeControl extends Control {
   draw = false;
   interactions = [];
 
-
   handleStyleSelection() {
     if (selectedFeatures.length > 0) {
       if (selectedFeatures.length == 1) {
@@ -140,7 +141,34 @@ class EditModeControl extends Control {
   addInteraction(inter) {
     map.addInteraction(inter);
     this.interactions.push(inter);
-  };
+  }
+
+  ctrlClickOverride(event) {
+    if(select.getFeatures().getArray().length > 0 && platformModifierKeyOnly(event)) {
+      selectedFeatures = select.getFeatures().getArray();
+      if (selectedFeatures.length > 1 ) {
+        nameElement.disabled = true;
+        tooltipElement.disabled =true;
+        popupElement.disabled =true; 
+
+        nameElement.value = "*";
+        typeElement.value = selectedFeatures[0].get('styleTemplate');
+        tooltipElement.value = "*";
+        popupElement.value = "*";
+      } else {
+        nameElement.disabled = false;
+        tooltipElement.disabled = false;
+        popupElement.disabled = false;
+
+        nameElement.value = selectedFeatures[0].get('name') || "";
+        typeElement.value = selectedFeatures[0].get('styleTemplate');
+        tooltipElement.value = selectedFeatures[0].get('tooltip') || " ";
+        popupElement.value = selectedFeatures[0].get('popup') || " ";
+      }
+    
+      dialog_style.showModal();
+    } 
+  }
 
   handleOpenMenu() {
     if (this.draw) {
@@ -148,8 +176,11 @@ class EditModeControl extends Control {
       button_edit.defaultStyle = null;
 
       this.clearInteractions();
+      select = null;
+      selectedFeatures =[];
       editMode = false;
       this.draw = false;
+      map.un('click', this.ctrlClickOverride);
       editableVectorSources[select_layer.value].changed();
       
     } else {
@@ -224,33 +255,14 @@ class EditModeControl extends Control {
     this.closeMenu();
     this.clearInteractions();
       
-    var select = new Select({
+    select = new Select({
       wrapX: false,
+      condition: function (e) {
+        return (singleClick(e) && !platformModifierKeyOnly(e));
+      },
     });
 
-    select.addEventListener('select', function(event) {
-      if(event.selected.length > 0 && event.mapBrowserEvent.originalEvent.ctrlKey) {
-        selectedFeatures = event.target.getFeatures().getArray();
-        if (selectedFeatures.length > 1 ) {
-          nameElement.disabled = true;
-          tooltipElement.disabled =true;
-          popupElement.disabled =true; 
-
-          typeElement.value = selectedFeatures[0].get('styleTemplate');
-        } else {
-          nameElement.disabled = false;
-          tooltipElement.disabled = false;
-          popupElement.disabled = false;
-
-          nameElement.value = selectedFeatures[0].get('name');
-          typeElement.value = selectedFeatures[0].get('styleTemplate');
-          tooltipElement.value = selectedFeatures[0].get('tooltip');
-          popupElement.value = selectedFeatures[0].get('popup');
-        }
-      
-        dialog_style.showModal();
-      } 
-    })
+    map.on('click', this.ctrlClickOverride)
     this.addInteraction(select);
 
     this.addInteraction(new Modify({
