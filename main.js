@@ -7,6 +7,7 @@ import Static from 'ol/source/ImageStatic';
 import View from 'ol/View';
 import {getCenter} from 'ol/extent';
 import LayerGroup from 'ol/layer/Group';
+import Overlay from 'ol/Overlay';
 
 import 'ol-layerswitcher/dist/ol-layerswitcher.css';
 import LayerSwitcher from 'ol-layerswitcher';
@@ -19,6 +20,9 @@ import {Draw, Modify, Select, Snap} from 'ol/interaction';
 import {Control, defaults as defaultControls} from 'ol/control';
 import {singleClick, platformModifierKeyOnly} from 'ol/events/condition';
 import {getUid} from 'ol/util';
+
+import bootstrap from "bootstrap/dist/js/bootstrap.bundle.min";
+
 
 
 
@@ -37,6 +41,9 @@ var editableVectorSources = {};
 //var drawElement = null;
 //var snap = null;
 var editMode = false;
+
+const element = document.getElementById('popup');
+
 
 
 class EditModeControl extends Control {
@@ -723,6 +730,40 @@ const layerSwitcher = new LayerSwitcher({
 });
 map.addControl(layerSwitcher);
 
+const popup = new Overlay({
+  element: element,
+  positioning: 'bottom-center',
+  stopEvent: false,
+});
+map.addOverlay(popup);
+
+let popover;
+function disposePopover() {
+  if (popover) {
+    popover.dispose();
+    popover = undefined;
+  }
+}
+
+map.on('click', function (evt) {
+  const feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+    return feature;
+  });
+  disposePopover();
+  if (!feature) {
+    return;
+  }
+  popup.setPosition(evt.coordinate);
+  popover = new bootstrap.Popover(element, {
+    placement: 'top',
+    html: true,
+    content:'<h5 id="durgo_silvermane">Durgo Silvermane</h5><div class="level5"><p>Der aktuelle Innkeeper der den Betrieb mit seinen beiden Kellnerinnen am Laufen hält. Scheint ein angenehmer Kerl zu sein.</p>' 
+    //feature.get('name'),
+  });
+  popover.show();
+});
+
+map.on('movestart', disposePopover);
 
 // Add the layer to the map
 
