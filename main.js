@@ -537,6 +537,7 @@ const faerun_gm = new ImageLayer({
     url: 'sourcemaps/faerun-detailed.png',
     projection: projection,
     imageExtent: extent,
+    attributions: "<a href=\"https://dnd.wizards.com/\">&copy; 2016 Wizards of the Coast (R. Lazzaretti, T. Gamble, D. Kauth</a>"
   }),
   zIndex: 10,
 });
@@ -550,6 +551,7 @@ const faerun_pc = new ImageLayer({
     url: 'sourcemaps/faerun-rough.png',
     projection: projection,
     imageExtent: extent,
+    attributions: "<a href=\"https://devenrue.com/\">&copy; 2017 Devan Rue</a>"
   }),
   zIndex: 10,
 });
@@ -561,6 +563,7 @@ const heartlands_pc = new ImageLayer({
     url: 'sourcemaps/cormyr-unlabeled.png',
     projection: projection,
     imageExtent: extent2,
+    attributions: "<a href=\"https://www.deviantart.com/markustay\">&copy; 2009 Mark Taylor</a>"
   }),
   minZoom: 3,
   zIndex: 100,
@@ -827,7 +830,7 @@ map.on('click', function (evt) {
     return feature;
   });
   disposePopover();
-  if (!feature || !feature.get('popup')) {
+  if (editMode || !feature || !feature.get('popup')) {
     return;
   }
   popup.setPosition(evt.coordinate);
