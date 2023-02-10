@@ -25,10 +25,9 @@ import bootstrap from "bootstrap/dist/js/bootstrap.bundle.min";
 
 const nameElement = document.getElementById('fname');
 const typeElement = document.getElementById('ftype');
-const tooltipElement = document.getElementById('ftooltip');
 const popupElement = document.getElementById('fpopup');
 
-const sortOrder = ['City', 'Marker', 'Mountain', 'Ocean', 'Forest', 'Desert', 'Lake', 'MajorRoad', 'MinorRoad', 'Path', 'River'];
+const sortOrder = ['City', 'Marker', 'Mountain', 'Ocean', 'Forest', 'Desert', 'Lake', 'MajorRoad', 'MinorRoad', 'Path', 'Hill', 'River'];
 
 var selectedFeatures = [];
 var select = null;
@@ -139,8 +138,7 @@ class EditModeControl extends Control {
         var f = selectedFeatures[0];
         f.set('name', nameElement.value);
         f.set('styleTemplate', typeElement.value);
-        f.set('tooltip', tooltipElement.value)
-        f.set('popup', popupElement.value)
+        f.set('popup', popupElement.value);
       } else {
         selectedFeatures.forEach(function(f){
           f.set('styleTemplate', typeElement.value);
@@ -166,21 +164,17 @@ class EditModeControl extends Control {
       selectedFeatures = select.getFeatures().getArray();
       if (selectedFeatures.length > 1 ) {
         nameElement.disabled = true;
-        tooltipElement.disabled =true;
         popupElement.disabled =true; 
 
         nameElement.value = "*";
         typeElement.value = selectedFeatures[0].get('styleTemplate');
-        tooltipElement.value = "*";
         popupElement.value = "*";
       } else {
         nameElement.disabled = false;
-        tooltipElement.disabled = false;
         popupElement.disabled = false;
 
         nameElement.value = selectedFeatures[0].get('name') || "";
         typeElement.value = selectedFeatures[0].get('styleTemplate');
-        tooltipElement.value = selectedFeatures[0].get('tooltip') || " ";
         popupElement.value = selectedFeatures[0].get('popup') || " ";
       }
     
@@ -263,6 +257,7 @@ class EditModeControl extends Control {
 
   handleDrawEnd(event) {
     selectedFeatures = [event.feature];
+    typeElement.value = button_edit.defaultStyle;
     event.feature.set('styleTemplate', button_edit.defaultStyle);
   
     dialog_style.showModal();
@@ -363,6 +358,27 @@ stylesLabel['MinorRoad'] = new Style({
   })
 })
 
+styles['Path'] = new Style({
+  stroke: new Stroke({
+    color: 'brown',
+    width: 1.5,
+    lineDash: [2]
+  }),
+});
+styles['Path'].defaultWidth = 1.5;
+stylesLabel['Path'] = new Style({
+  text: new Text({
+    stroke: new Stroke({
+      color: 'white',
+      width: 3
+    }),
+    font: '12px serif',
+    color: 'brown',
+    placement: 'line',
+    offsetY: 0
+  })
+})
+
 styles['River'] = new Style(null);
 styles['River'].defaultWidth = 1.5;
 stylesLabel['River'] = new Style({
@@ -423,6 +439,23 @@ stylesLabel['Mountain'] = new Style({
       width: 3
     }),
     font: '24px serif',
+    placement: 'line',
+    fill: new Fill({
+      color: 'brown',
+    }),
+    offsetY: 0
+  })
+})
+
+styles['Hill'] = new Style(null);
+styles['Hill'].defaultWidth = 1.5;
+stylesLabel['Hill'] = new Style({
+  text: new Text({
+    stroke: new Stroke({
+      color: 'white',
+      width: 3
+    }),
+    font: '12px serif',
     placement: 'line',
     fill: new Fill({
       color: 'brown',
@@ -759,15 +792,14 @@ map.on('click', function (evt) {
     return feature;
   });
   disposePopover();
-  if (!feature) {
+  if (!feature || !feature.get('popup')) {
     return;
   }
   popup.setPosition(evt.coordinate);
   popover = new bootstrap.Popover(element, {
     placement: 'top',
     html: true,
-    content:'<h5 id="durgo_silvermane">Durgo Silvermane</h5><div class="level5"><p>Der aktuelle Innkeeper der den Betrieb mit seinen beiden Kellnerinnen am Laufen hält. Scheint ein angenehmer Kerl zu sein.</p>' 
-    //feature.get('name'),
+    content: feature.get('popup')
   });
   popover.show();
 });
