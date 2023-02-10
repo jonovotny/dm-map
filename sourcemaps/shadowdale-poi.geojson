@@ -1,0 +1,155 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2136.9611647298466,
+          2808.2923699018424
+        ]
+      },
+      "properties": {
+        "styleTemplate": "Marker",
+        "name": "",
+        "popup": "Ritual Gate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2136.9963338991397,
+          2808.2506437687825
+        ]
+      },
+      "properties": {
+        "styleTemplate": "Marker",
+        "name": "",
+        "popup": "Fox Ridge Camp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2137.132082648256,
+          2808.5682028673727
+        ]
+      },
+      "properties": {
+        "styleTemplate": "Marker",
+        "name": "",
+        "popup": "<a href=\"https://scivis.at/wiki/doku.php?id=dnd35:corm:dalelands#castle_krag\" target=\"_blank\">Castle Krag</a>"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2137.3605767865915,
+          2808.714321365775
+        ]
+      },
+      "properties": {
+        "styleTemplate": "Marker",
+        "name": "",
+        "popup": "<a href=\"https://scivis.at/wiki/doku.php?id=dnd35:corm:dalelands#watcher_s_knoll\" target=\"_blank\">Watcher's Knoll</a>"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2136.2010549645092,
+          2807.743244066806
+        ]
+      },
+      "properties": {
+        "styleTemplate": "Marker",
+        "name": "",
+        "popup": "<a href=\"https://scivis.at/wiki/doku.php?id=dnd35:corm:dalelands#the_house_of_the_lady_32\" target=\"_blank\">The House of the Lady</a>"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2136.3532738389813,
+          2807.7990229009442
+        ]
+      },
+      "properties": {
+        "styleTemplate": "Marker",
+        "name": "",
+        "popup": "Twisted Tower of Ashaba"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2136.5413948079436,
+          2807.898231413364
+        ]
+      },
+      "properties": {
+        "styleTemplate": "Marker",
+        "name": "",
+        "popup": "<a href=\"https://scivis.at/wiki/doku.php?id=dnd35:corm:dalelands#elminster_s_turm_ruine_4\" target=\"_blank\">Eliminster's Turm Ruine</a>"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2136.7579708737676,
+          2807.907671908541
+        ]
+      },
+      "properties": {
+        "styleTemplate": "Marker",
+        "name": "",
+        "popup": "<a href=\"https://scivis.at/wiki/doku.php?id=dnd35:corm:dalelands#old_skull_inn_12\" target=\"_blank\">Old Skull Inn</a>"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2136.802396733424,
+          2807.8904568879243
+        ]
+      },
+      "properties": {
+        "styleTemplate": "Marker",
+        "name": "",
+        "popup": "General Store"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2136.85889856738,
+          2807.971146687239
+        ]
+      },
+      "properties": {
+        "styleTemplate": "Marker",
+        "name": "",
+        "popup": "<a href=\"https://scivis.at/wiki/doku.php?id=dnd35:corm:dalelands#the_house_of_plenty_16\" target=\"_blank\">The House of Plenty</a>"
+      }
+    }
+  ]
+}

@@ -362,7 +362,7 @@ styles['Path'] = new Style({
   stroke: new Stroke({
     color: 'brown',
     width: 1.5,
-    lineDash: [2]
+    lineDash: [4, 4]
   }),
 });
 styles['Path'].defaultWidth = 1.5;
@@ -516,12 +516,13 @@ styles['Marker'] = new Style({
 styles['Marker'].defaultRadius = 6;
 stylesLabel['Marker'] = new Style({
   text: new Text({
+    fill: new Fill({color: 'black'}),
     stroke: new Stroke({
       color: 'white',
       width: 3
     }),
     font: '900 16px "Font Awesome 6 Free"',
-    offsetY: -12
+    offsetY: 0
   })
 })
 
@@ -612,6 +613,11 @@ var heartlands_pc_src = new VectorSource({
 var shadowdale_pc_src = new VectorSource({
   format: new GeoJSON(),
   url: 'sourcemaps/shadowdale-markers.geojson'
+});
+
+var shadowdale_pc_poi_src = new VectorSource({
+  format: new GeoJSON(),
+  url: 'sourcemaps/shadowdale-poi.geojson'
 });
 
 //Vector Layers
@@ -720,6 +726,34 @@ var shadowdale_pc_labels = new VectorLayer({
   declutter: true,
 });
 
+
+var shadowdale_pc_poi = new VectorLayer({
+  title: 'Shadowdale (Labels)',
+  className: 'layer-sd-p',
+  visible: true,
+  source: shadowdale_pc_poi_src,
+  style: function(feature, resolution){
+    var baseStyle;
+    if (stylesLabel[feature.get('styleTemplate')]) {
+      baseStyle = stylesLabel[feature.get('styleTemplate')].clone();
+    } else {
+      baseStyle = new Style();
+    }
+
+    var label = feature.get('name');
+
+    if (label) {
+      if (baseStyle.getText()) {
+        baseStyle.getText().setText(label);
+      }
+    }
+
+    return baseStyle;
+  },
+  minZoom: 14,
+  zIndex: 230,
+});
+
 //Layer Groups
 
 const baseMaps = new LayerGroup({
@@ -742,7 +776,7 @@ const shadowdale_pc_lg = new LayerGroup({
   visible: true,
   combine: true,
   zIndex: 220,
-  layers: [shadowdale_pc, shadowdale_pc_markers, shadowdale_pc_labels],
+  layers: [shadowdale_pc, shadowdale_pc_markers, shadowdale_pc_labels, shadowdale_pc_poi],
 });
 
 const overlayMaps = new LayerGroup({
@@ -753,6 +787,7 @@ const overlayMaps = new LayerGroup({
 
 editableVectorSources['Western Heartlands (Players)'] = heartlands_pc_src;
 editableVectorSources['Shadowdale (Players)'] = shadowdale_pc_src;
+editableVectorSources['Shadowdale POI (Players)'] = shadowdale_pc_poi_src;
 
 const map = new Map({
   controls: defaultControls().extend([new EditModeControl()]),
@@ -812,11 +847,13 @@ map.getView().on('change:resolution', (event) => {
   styles['City'].getImage().setRadius(Math.max(Math.min(styles['City'].defaultRadius/event.oldValue, 8),3));
   styles['MajorRoad'].getStroke().setWidth(Math.max(Math.min(styles['MajorRoad'].defaultWidth/event.oldValue, 4),0.5));
   styles['MinorRoad'].getStroke().setWidth(Math.max(Math.min(styles['MinorRoad'].defaultWidth/event.oldValue, 3),0.25));
+  styles['Path'].getStroke().setWidth(Math.max(Math.min(styles['Path'].defaultWidth/event.oldValue, 3),0.25));
 });
 
 styles['City'].getImage().setRadius(Math.max(Math.min(styles['City'].defaultRadius/map.getView().getResolution(), 8),3));
 styles['MajorRoad'].getStroke().setWidth(Math.max(Math.min(styles['MajorRoad'].defaultWidth/map.getView().getResolution(), 4),0.5));
 styles['MinorRoad'].getStroke().setWidth(Math.max(Math.min(styles['MinorRoad'].defaultWidth/map.getView().getResolution(), 3),0.25));
+styles['Path'].getStroke().setWidth(Math.max(Math.min(styles['Path'].defaultWidth/map.getView().getResolution(), 3),0.25));
 
 
 
