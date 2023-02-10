@@ -23,10 +23,6 @@ import {getUid} from 'ol/util';
 
 import bootstrap from "bootstrap/dist/js/bootstrap.bundle.min";
 
-
-
-
-
 const nameElement = document.getElementById('fname');
 const typeElement = document.getElementById('ftype');
 const tooltipElement = document.getElementById('ftooltip');
@@ -56,6 +52,8 @@ class EditModeControl extends Control {
     const button_edit = document.createElement('button');
     button_edit.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
     button_edit.id = "button_edit";
+    button_edit.setAttribute("data-bs-toggle", "tooltip");
+    button_edit.title = "Draw/Modify Tools";
     
     const button_point = document.createElement('button');
     button_point.innerHTML = '•';
@@ -63,6 +61,8 @@ class EditModeControl extends Control {
     button_point.id = "button_point";
     button_point.drawType = "Point";
     button_point.defaultStyle = "City";
+    button_point.setAttribute("data-bs-toggle", "tooltip");
+    button_point.title = "Draw Point Feature";
 
     const button_line = document.createElement('button');
     button_line.innerHTML = '<i class="fa-solid fa-slash"></i>';
@@ -70,6 +70,8 @@ class EditModeControl extends Control {
     button_line.id = "button_line";
     button_line.drawType = "LineString";
     button_line.defaultStyle = "MajorRoad";
+    button_line.setAttribute("data-bs-toggle", "tooltip");
+    button_line.title = "Draw Line Feature";
 
     const button_area = document.createElement('button');
     button_area.innerHTML = '<i class="fa-solid fa-draw-polygon"></i>';
@@ -77,16 +79,22 @@ class EditModeControl extends Control {
     button_area.id = "button_area";
     button_area.drawType = "Polygon";
     button_area.defaultStyle = "MajorRoad";
+    button_area.setAttribute("data-bs-toggle", "tooltip");
+    button_area.title = "Draw Area Feature";
 
     const button_modify = document.createElement('button');
     button_modify.innerHTML = '<i class="fa-solid fa-up-down-left-right"></i>';
     button_modify.classList.add("hiddenElement");
     button_modify.id = "button_modify";
+    button_modify.setAttribute("data-bs-toggle", "tooltip");
+    button_modify.title = "Modify Features";
 
     const button_download = document.createElement('button');
     button_download.innerHTML = '<i class="fa-solid fa-download"></i>';
     button_download.classList.add("hiddenElement");
     button_download.id = "button_download";
+    button_download.setAttribute("data-bs-toggle", "tooltip");
+    button_download.title = "Download Vector Layer as GeoJson";
 
     const select_layer = document.createElement('select');
     select_layer.classList.add("hiddenElement");
@@ -192,7 +200,7 @@ class EditModeControl extends Control {
       this.draw = false;
       map.un('click', this.ctrlClickOverride);
       editableVectorSources[select_layer.value].changed();
-      
+      button_edit.title = "Draw/Modify Tools";
     } else {
       if (!this.active) {
         var children = Array.from(this.element.childNodes);
@@ -234,6 +242,7 @@ class EditModeControl extends Control {
     } else {
       button_edit.innerHTML = event.currentTarget.innerHTML;
       button_edit.defaultStyle = event.currentTarget.defaultStyle;
+      button_edit.title = "Exit Draw/Modify Mode";
       this.closeMenu();
       this.clearInteractions();
       
