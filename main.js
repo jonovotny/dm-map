@@ -850,13 +850,13 @@ map.getView().on('change:resolution', (event) => {
   styles['City'].getImage().setRadius(Math.max(Math.min(styles['City'].defaultRadius/event.oldValue, 8),3));
   styles['MajorRoad'].getStroke().setWidth(Math.max(Math.min(styles['MajorRoad'].defaultWidth/event.oldValue, 4),0.5));
   styles['MinorRoad'].getStroke().setWidth(Math.max(Math.min(styles['MinorRoad'].defaultWidth/event.oldValue, 3),0.25));
-  styles['Path'].getStroke().setWidth(Math.max(Math.min(styles['Path'].defaultWidth/event.oldValue, 3),0.25));
+  styles['Path'].getStroke().setWidth(Math.max(Math.min(styles['Path'].defaultWidth/event.oldValue, 2),0.25));
 });
 
 styles['City'].getImage().setRadius(Math.max(Math.min(styles['City'].defaultRadius/map.getView().getResolution(), 8),3));
 styles['MajorRoad'].getStroke().setWidth(Math.max(Math.min(styles['MajorRoad'].defaultWidth/map.getView().getResolution(), 4),0.5));
 styles['MinorRoad'].getStroke().setWidth(Math.max(Math.min(styles['MinorRoad'].defaultWidth/map.getView().getResolution(), 3),0.25));
-styles['Path'].getStroke().setWidth(Math.max(Math.min(styles['Path'].defaultWidth/map.getView().getResolution(), 3),0.25));
+styles['Path'].getStroke().setWidth(Math.max(Math.min(styles['Path'].defaultWidth/map.getView().getResolution(), 2),0.25));
 
 
 
