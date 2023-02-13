@@ -17,7 +17,7 @@ import {Vector as VectorSource} from 'ol/source';
 import {Vector as VectorLayer} from 'ol/layer';
 
 import {Draw, Modify, Select, Snap} from 'ol/interaction';
-import {Control, defaults as defaultControls} from 'ol/control';
+import {ScaleLine, Control, defaults as defaultControls} from 'ol/control';
 import {singleClick, platformModifierKeyOnly} from 'ol/events/condition';
 import {getUid} from 'ol/util';
 
@@ -301,6 +301,10 @@ class EditModeControl extends Control {
   }
 }
 
+var controlScale = new ScaleLine({
+  units: 'imperial', bar: true, minWidth: 150
+})
+
 // Map views always need a projection.  Here we just want to map image
 // coordinates directly to map coordinates, so we create a projection that uses
 // the image extent in pixels.
@@ -312,9 +316,10 @@ const extent5 = [2135, 2807, 2138.107, 2808.997];
 
 
 const projection = new Projection({
-  code: 'xkcd-image',
+  code: 'map-image',
   units: 'pixels',
   extent: extent,
+  metersPerUnit: 1287.48
 });
 
 const styles = new Object;
@@ -793,7 +798,7 @@ editableVectorSources['Shadowdale (Players)'] = shadowdale_pc_src;
 editableVectorSources['Shadowdale POI (Players)'] = shadowdale_pc_poi_src;
 
 const map = new Map({
-  controls: defaultControls().extend([new EditModeControl()]),
+  controls: defaultControls().extend([new EditModeControl(), controlScale]),
   layers: [baseMaps, overlayMaps],
   target: 'map',
   view: new View({
