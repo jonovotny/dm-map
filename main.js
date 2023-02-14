@@ -19,7 +19,6 @@ import {Vector as VectorLayer} from 'ol/layer';
 import {Draw, Modify, Select, Snap} from 'ol/interaction';
 import {ScaleLine, Control, defaults as defaultControls} from 'ol/control';
 import {singleClick, platformModifierKeyOnly} from 'ol/events/condition';
-import {getUid} from 'ol/util';
 
 import bootstrap from "bootstrap/dist/js/bootstrap.bundle.min";
 
@@ -287,10 +286,19 @@ class EditModeControl extends Control {
     editableVectorSources[select_layer.value].changed();
   }
 
+  featureComp(a,b) {
+    var diff = sortOrder.findIndex((element) => element == a.get('styleTemplate')) - sortOrder.findIndex((element) => element == b.get('styleTemplate'));
+    if (diff == 0) {
+      diff = (b.get('labelPriority') | 0) - (a.get('labelPriority') | 0);
+    }
+    return diff;
+  }
+
   handleDownload() {
     var format = new GeoJSON(); 
     
-    var geoJsonStr = format.writeFeatures(editableVectorSources[select_layer.value].getFeatures().sort((a,b) => {return sortOrder.findIndex((element) => element == a.get('styleTemplate')) - sortOrder.findIndex((element) => element == b.get('styleTemplate'));}));
+    var geoJsonStr = format.writeFeatures(editableVectorSources[select_layer.value].getFeatures().sort(featureComp));
+      //(a,b) => {return sortOrder.findIndex((element) => element == a.get('styleTemplate')) - sortOrder.findIndex((element) => element == b.get('styleTemplate'));}));
 
     var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(JSON.parse(geoJsonStr), null, 2));
     var dlAnchorElem = document.getElementById('downloadAnchorElem');
@@ -308,17 +316,11 @@ var controlScale = new ScaleLine({
 // Map views always need a projection.  Here we just want to map image
 // coordinates directly to map coordinates, so we create a projection that uses
 // the image extent in pixels.
-const extent = [0, 0, 4763, 3411];
-const extent2 = [1603, 2032, 2782, 3022];
-const extent3 = [2009, 2392, 2011.032, 2393.516];
-const extent4 = [2135, 2807, 2138.107, 2808.997];
-const extent5 = [2135, 2807, 2138.107, 2808.997];
-
-
+const baseExtent = [0, 0, 4763, 3411];
 const projection = new Projection({
   code: 'map-image',
   units: 'pixels',
-  extent: extent,
+  extent: baseExtent,
   metersPerUnit: 1287.48
 });
 
@@ -541,7 +543,7 @@ const faerun_gm = new ImageLayer({
   source: new Static({
     url: 'sourcemaps/faerun-detailed.png',
     projection: projection,
-    imageExtent: extent,
+    imageExtent: extentBase,
     attributions: "<a href=\"https://dnd.wizards.com/\">&copy; 2016 Wizards of the Coast (R. Lazzaretti, T. Gamble, D. Kauth</a>"
   }),
   zIndex: 10,
@@ -555,57 +557,61 @@ const faerun_pc = new ImageLayer({
   source: new Static({
     url: 'sourcemaps/faerun-rough.png',
     projection: projection,
-    imageExtent: extent,
+    imageExtent: extentBase,
     attributions: "<a href=\"https://devenrue.com/\">&copy; 2017 Devan Rue</a>"
   }),
   zIndex: 10,
 });
 
+const extent_wh_i = [1603, 2032, 2782, 3022];
 const heartlands_pc = new ImageLayer({
   title: 'Western Heartlands (Players)',
   className: 'layer-wh-i',
   source: new Static({
     url: 'sourcemaps/cormyr-unlabeled.png',
     projection: projection,
-    imageExtent: extent2,
+    imageExtent: extent_wh_i,
     attributions: "<a href=\"https://www.deviantart.com/markustay\">&copy; 2009 Mark Taylor</a>"
   }),
   minZoom: 3,
   zIndex: 100,
 });
 
+const extent_sd_i2 = [2135, 2807, 2138.107, 2808.997];
 const shadowdale_gm = new ImageLayer({
   title: 'Shadowdale (GM)',
   className: 'layer-sd-i2',
   source: new Static({
     url: 'sourcemaps/shadowdale-surrounding.jpg',
     projection: projection,
-    imageExtent: extent4,
+    imageExtent: extent_sd_i2,
   }),
   minZoom: 10,
   zIndex: 190,
   visible: false
 });
 
+const extent_sd_i = [2135, 2807, 2138.107, 2808.997];
 const shadowdale_pc = new ImageLayer({
   title: 'Shadowdale (Players)',
   className: 'layer-sd-i',
   source: new Static({
     url: 'sourcemaps/shadowdale-sepia.png',
     projection: projection,
-    imageExtent: extent5,
+    imageExtent: extent_sd_i,
   }),
   minZoom: 10,
   zIndex: 200
 });
 
+const extent_wl_i = [2009, 2392, 2011.032, 2393.516];
 const wheloon_pc = new ImageLayer({
   title: 'wheloon',
   className: 'layer-wl-i',
   source: new Static({
     url: 'sourcemaps/wheloon.jpg',
     projection: projection,
-    imageExtent: extent3,
+    imageExtent: extent_wl_i,
   }),
   minZoom: 10,
   zIndex: 200,
@@ -627,6 +633,10 @@ var shadowdale_pc_poi_src = new VectorSource({
   format: new GeoJSON(),
   url: 'sourcemaps/shadowdale-poi.geojson'
 });
+
+editableVectorSources['Western Heartlands (Players)'] = heartlands_pc_src;
+editableVectorSources['Shadowdale (Players)'] = shadowdale_pc_src;
+editableVectorSources['Shadowdale POI (Players)'] = shadowdale_pc_poi_src;
 
 //Vector Layers
 
@@ -792,10 +802,6 @@ const overlayMaps = new LayerGroup({
   visible: true,
   layers: [heartlands_pc_lg, wheloon_pc, shadowdale_gm, shadowdale_pc_lg],
 });
-
-editableVectorSources['Western Heartlands (Players)'] = heartlands_pc_src;
-editableVectorSources['Shadowdale (Players)'] = shadowdale_pc_src;
-editableVectorSources['Shadowdale POI (Players)'] = shadowdale_pc_poi_src;
 
 const map = new Map({
   controls: defaultControls().extend([new EditModeControl(), controlScale]),
