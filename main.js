@@ -316,11 +316,11 @@ var controlScale = new ScaleLine({
 // Map views always need a projection.  Here we just want to map image
 // coordinates directly to map coordinates, so we create a projection that uses
 // the image extent in pixels.
-const baseExtent = [0, 0, 4763, 3411];
+const extent_base = [0, 0, 4763, 3411];
 const projection = new Projection({
   code: 'map-image',
   units: 'pixels',
-  extent: baseExtent,
+  extent: extent_base,
   metersPerUnit: 1287.48
 });
 
@@ -543,7 +543,7 @@ const faerun_gm = new ImageLayer({
   source: new Static({
     url: 'sourcemaps/faerun-detailed.png',
     projection: projection,
-    imageExtent: extentBase,
+    imageExtent: extent_base,
     attributions: "<a href=\"https://dnd.wizards.com/\">&copy; 2016 Wizards of the Coast (R. Lazzaretti, T. Gamble, D. Kauth</a>"
   }),
   zIndex: 10,
@@ -557,7 +557,7 @@ const faerun_pc = new ImageLayer({
   source: new Static({
     url: 'sourcemaps/faerun-rough.png',
     projection: projection,
-    imageExtent: extentBase,
+    imageExtent: extent_base,
     attributions: "<a href=\"https://devenrue.com/\">&copy; 2017 Devan Rue</a>"
   }),
   zIndex: 10,
@@ -809,7 +809,7 @@ const map = new Map({
   target: 'map',
   view: new View({
     projection: projection,
-    center: getCenter(extent),
+    center: getCenter(extent_base),
     zoom: 2,
     maxZoom: 16,
   }),
