@@ -37,6 +37,34 @@ var editableVectorSources = {};
 var editMode = false;
 
 const element = document.getElementById('popup');
+var headers = [];
+var section = {};
+
+//https://scivis.at/wiki/doku.php?id=dnd35:corm:dalelands&do=export_html
+
+var request = new XMLHttpRequest();
+request.open('GET',"https://scivis.at/wiki/doku.php?id=dnd35:corm:dalelands&do=export_html", true);
+request.responseType = 'blob';
+request.onload = function() {
+    var reader = new FileReader();
+    reader.readAsText(request.response);
+    reader.onload =  function(e){
+        console.log('DataURL:', e.target.result);
+        var ele = document.getElementById('htmlParserElem')
+        ele.innerHTML = e.target.result;
+
+        headers = Array.from(ele.querySelectorAll("h1, h2, h3, h4, h5, h6"));
+        headers.forEach(function(header){
+          if(!header.id) return;
+          var html = "<a href=\"https://scivis.at/wiki/doku.php?id=dnd35:corm:dalelands#" + header.id +"\">" + header.innerHTML +"</a>"
+          if(header.nextElementSibling && header.nextElementSibling.children[0] && header.nextElementSibling.children[0].nodeName == "P") {
+            html += header.nextElementSibling.children[0].outerHTML;
+          }
+          section[header.id] = html;
+        });
+    };
+};
+request.send();
 
 
 
@@ -848,7 +876,7 @@ map.on('click', function (evt) {
   popover = new bootstrap.Popover(element, {
     placement: 'top',
     html: true,
-    content: feature.get('popup')
+    content: section['shadowdale']//feature.get('popup')
   });
   popover.show();
 });
