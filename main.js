@@ -22,6 +22,8 @@ import {singleClick, platformModifierKeyOnly} from 'ol/events/condition';
 
 import bootstrap from "bootstrap/dist/js/bootstrap.bundle.min";
 
+
+
 const nameElement = document.getElementById('fname');
 const typeElement = document.getElementById('ftype');
 const popupElement = document.getElementById('fpopup');
